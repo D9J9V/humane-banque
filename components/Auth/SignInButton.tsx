@@ -1,4 +1,3 @@
-"use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 export const SignInButton = () => {
@@ -30,6 +29,7 @@ export const SignInButton = () => {
                   ? `${session.user.name.split(" ")[0]}`
                   : "Profile"}
                 <span className="badge badge-ghost badge-sm">
+                  {/* Display first 6 chars of subject ID as a concise identifier */}
                   {session.user?.sub?.slice(0, 6) ?? "???"}...
                 </span>
               </span>
@@ -54,7 +54,7 @@ export const SignInButton = () => {
     return (
       <button
         onClick={() => signIn("worldcoin")}
-        className="btn btn-primary btn-sm" // Use DaisyUI button classes
+        className="btn btn-primary btn-sm"
       >
         Sign In
       </button>

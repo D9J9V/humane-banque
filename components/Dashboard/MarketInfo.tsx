@@ -1,7 +1,7 @@
-import { InfoTooltip } from "@/components/Landing/LandingPageContent"; // Reuse tooltip if needed
+import { InfoTooltip } from "@/components/Landing/LandingPageContent";
 
 export const MarketInfo = () => {
-  // In a real app, fetch this data
+  // Placeholder data - Fetch this from the backend/API in a real application
   const marketData = [
     { term: 30, auctionRate: "4.5%", effectiveRate: "4.3%" },
     { term: 90, auctionRate: "5.0%", effectiveRate: "4.8%" },
@@ -9,14 +9,11 @@ export const MarketInfo = () => {
   ];
 
   return (
-    // Use DaisyUI Card
     <div className="card bg-base-100 shadow-md">
       <div className="card-body">
         <h2 className="card-title">Market Rates (Fixed Term)</h2>
         <div className="overflow-x-auto">
-          {/* Use DaisyUI Table */}
           <table className="table table-zebra table-sm w-full">
-            {/* head */}
             <thead>
               <tr>
                 <th>Term (Days)</th>
@@ -48,7 +45,8 @@ export const MarketInfo = () => {
           </table>
         </div>
         <p className="text-xs text-base-content/70 mt-2">
-          * Rates are indicative based on the last completed auction cycle.
+          {/* Clarify that rates are historical */}* Rates are indicative based
+          on the last completed auction cycle.
         </p>
       </div>
     </div>

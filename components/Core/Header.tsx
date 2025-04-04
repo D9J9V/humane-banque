@@ -5,7 +5,6 @@ import Link from "next/link";
 
 export const Header = () => {
   return (
-    // Use DaisyUI Navbar
     <div className="navbar bg-base-100 border-b border-base-300">
       <div className="flex-1">
         <Link href="/dashboard" legacyBehavior>
@@ -13,7 +12,7 @@ export const Header = () => {
         </Link>
       </div>
       <div className="flex-none">
-        <SignInButton /> {/* SignInButton will also be updated */}
+        <SignInButton />
       </div>
     </div>
   );

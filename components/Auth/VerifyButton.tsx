@@ -3,7 +3,7 @@
 import { useVerification } from "@/lib/useVerification";
 
 interface VerifyButtonProps {
-  onVerified?: () => void; // Optional callback on success
+  onVerified?: () => void; // Optional callback on successful verification
 }
 
 export const VerifyButton = ({ onVerified }: VerifyButtonProps) => {
@@ -14,28 +14,23 @@ export const VerifyButton = ({ onVerified }: VerifyButtonProps) => {
     const result = await triggerVerification();
     if (result) {
       console.log("Verification successful in component");
-      if (onVerified) {
-        onVerified();
-      }
+      onVerified?.();
     } else {
       console.error("Verification failed in component");
-      // Error is displayed via verificationError state
+      // Error message is displayed via verificationError state within the component UI
     }
   };
 
-  // Don't show anything if already verified in this specific component instance
-  // Parent components should handle conditional rendering based on the hook's `isVerified` state
+  // Render nothing if verification is already complete for this instance.
+  // Parent components should use the hook's `isVerified` state for conditional rendering of content.
   if (isVerified && !isVerifying) {
-    // It's better for the parent component (e.g., DashboardPage) to decide
-    // whether to show this success message or just proceed.
-    // Returning null here makes VerifyButton purely an action component when verified.
-    // Alternatively, show a success indicator:
+    // Returning null makes VerifyButton purely an action component (disappears after success).
+    // Alternatively, could show a success indicator:
     // return <span className="text-sm text-success flex items-center gap-1">✅ Verified</span>;
-    return null; // Let parent decide what to show post-verification
+    return null;
   }
 
   return (
-    // Use DaisyUI Alert for prompting verification
     <div className="alert alert-warning shadow-lg">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +56,7 @@ export const VerifyButton = ({ onVerified }: VerifyButtonProps) => {
       <button
         onClick={handleVerifyClick}
         disabled={isVerifying}
-        className="btn btn-sm btn-success" // Use DaisyUI button classes
+        className="btn btn-sm btn-success"
       >
         {isVerifying ? (
           <span className="loading loading-spinner loading-xs"></span>

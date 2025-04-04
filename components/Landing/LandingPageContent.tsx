@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-// Helper component for tooltips
+// Reusable tooltip component for explaining terms inline
 export const InfoTooltip = ({
   term,
   explanation,
@@ -18,7 +18,6 @@ export const InfoTooltip = ({
 export const LandingPageContent = () => {
   return (
     <div className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center text-center">
-      {/* Hero Section */}
       <div className="hero min-h-[60vh] bg-base-200 rounded-box mb-10">
         <div className="hero-content text-center">
           <div className="max-w-md">
@@ -43,10 +42,8 @@ export const LandingPageContent = () => {
         </div>
       </div>
 
-      {/* Features Section */}
       <h2 className="text-3xl font-bold mb-6">Why Humane Banque?</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 w-full max-w-4xl">
-        {/* Card 1: Predictability */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body items-center text-center">
             <h3 className="card-title">Predictability</h3>
@@ -61,7 +58,6 @@ export const LandingPageContent = () => {
             </p>
           </div>
         </div>
-        {/* Card 2: Fair Rates */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body items-center text-center">
             <h3 className="card-title">Fair & Transparent Rates</h3>
@@ -75,7 +71,6 @@ export const LandingPageContent = () => {
             </p>
           </div>
         </div>
-        {/* Card 3: Security */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body items-center text-center">
             <h3 className="card-title">Enhanced Security</h3>
@@ -96,7 +91,6 @@ export const LandingPageContent = () => {
         </div>
       </div>
 
-      {/* How It Works Section */}
       <h2 className="text-3xl font-bold mb-6">How It Works (Simplified)</h2>
       <div className="w-full max-w-2xl mb-10">
         <ul className="steps steps-vertical lg:steps-horizontal w-full">
@@ -124,14 +118,13 @@ export const LandingPageContent = () => {
         </ul>
       </div>
 
-      {/* --- FAQ Section START --- */}
       <h2 className="text-3xl font-bold mb-6 mt-10">
         Frequently Asked Questions
       </h2>
       <div className="w-full max-w-4xl mb-10 space-y-2">
-        {/* FAQ 1: Fixed Terms */}
+        {/* FAQ items using DaisyUI collapse for better organization */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
-          <input type="radio" name="landing-faq" />
+          <input type="radio" name="landing-faq" defaultChecked />
           <div className="collapse-title font-medium">
             Why use fixed terms (e.g., 30, 90 days) instead of indefinite
             lending?
@@ -163,7 +156,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 2: Interest Rates */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -188,7 +180,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 3: World ID Mandatory */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -217,7 +208,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 4: Lender Protection */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -251,7 +241,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 5: Defaults & Blacklisting */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -284,7 +273,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 6: Uniswap V4 Hooks */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -312,7 +300,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 7: No Token */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -329,7 +316,6 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        {/* FAQ 8: User Experience */}
         <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
           <div className="collapse-title font-medium">
@@ -350,11 +336,8 @@ export const LandingPageContent = () => {
           </div>
         </div>
       </div>
-      {/* --- FAQ Section END --- */}
 
       <div className="text-sm text-base-content/70 mt-4">
-        {" "}
-        {/* Added mt-4 for spacing */}
         Built on{" "}
         <InfoTooltip
           term="Uniswap V4 Hooks"
