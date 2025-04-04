@@ -21,16 +21,14 @@ export default function RootLayout({
     () => import("../components/Eruda").then((c) => c.ErudaProvider),
     {
       ssr: false,
-    }
+    },
   );
   return (
     <html lang="en">
       <body className={inter.className}>
         <NextAuthProvider>
           <ErudaProvider>
-            <MiniKitProvider>
-              {children}
-            </MiniKitProvider>
+            <MiniKitProvider>{children}</MiniKitProvider>
           </ErudaProvider>
         </NextAuthProvider>
       </body>
