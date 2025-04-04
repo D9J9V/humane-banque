@@ -35,7 +35,7 @@ export default function LendPage() {
   if (!isVerified) {
     return (
       <div className="max-w-lg mx-auto">
-        {/* VerifyButton component now includes the alert styling */}
+        {/* Prompt user to verify before allowing lending */}
         <VerifyButton />
       </div>
     );

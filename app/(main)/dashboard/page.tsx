@@ -4,11 +4,11 @@ import { useSession } from "next-auth/react";
 import { useVerification } from "@/lib/useVerification";
 import { MarketInfo } from "@/components/Dashboard/MarketInfo";
 import { VerifyButton } from "@/components/Auth/VerifyButton";
-import { SignInButton } from "@/components/Auth/SignInButton"; // Still needed for prompt
+import { SignInButton } from "@/components/Auth/SignInButton";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
-  const { isVerified } = useVerification(); // Use the hook's state
+  const { isVerified } = useVerification();
 
   if (status === "loading") {
     return (
@@ -20,7 +20,6 @@ export default function DashboardPage() {
 
   if (!session) {
     return (
-      // Use Card for better visual grouping
       <div className="card bg-base-100 shadow-xl max-w-md mx-auto">
         <div className="card-body items-center text-center">
           <h2 className="card-title">Welcome to Humane Banque!</h2>
@@ -36,29 +35,21 @@ export default function DashboardPage() {
     );
   }
 
-  // Signed in, now check verification
   return (
     <div className="space-y-6">
-      {/* Conditionally render VerifyButton prompt OR MarketInfo */}
       {!isVerified ? (
-        <VerifyButton /> // The VerifyButton now includes the prompt styling
+        // Prompt user to verify if they haven't yet
+        <VerifyButton />
       ) : (
+        // Show main market info if verified
         <div>
-          {/* Optional: Welcome message for verified users */}
-          {/* <div className="alert alert-success shadow-lg mb-6">
-                <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>You are verified! Access all features.</span>
-                </div>
-             </div> */}
           <h2 className="text-2xl font-semibold mb-4">Market Overview</h2>
           <MarketInfo />
         </div>
       )}
 
-      {/* Always show MarketInfo but maybe disabled/greyed out if not verified? */}
-      {/* Example: Greyed out version */}
       {!isVerified && (
+        // Show a disabled/preview version of market info if not verified
         <div className="mt-8 opacity-50">
           <h2 className="text-2xl font-semibold mb-4 text-base-content/50">
             Market Overview (Verification Required)
@@ -67,7 +58,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Add more dashboard components here later, e.g., portfolio summary */}
+      {/* TODO: Add more dashboard components here later (e.g., portfolio summary) */}
     </div>
   );
 }
