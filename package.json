@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.1.3",
     "@worldcoin/minikit-js": "1.3.0",
     "eruda": "^3.2.3",
