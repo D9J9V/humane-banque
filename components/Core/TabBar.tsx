@@ -2,15 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-// Removed unused icons CurrencyDollarIcon and ArrowDownTrayIcon
-import { HomeIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { Config } from "@/lib/config";
 
-const tabs = [
+// Define base tabs that are always available
+const baseTabs = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   { name: "Lend", href: "/lend", icon: ArrowUpTrayIcon },
-  // Commented out tabs remain for potential future use
-  // { name: "Borrow", href: "/borrow", icon: ArrowDownTrayIcon },
-  // { name: "Portfolio", href: "/portfolio", icon: CurrencyDollarIcon },
+];
+
+// Feature-flagged tabs
+const borrowingEnabled = Config.features.borrowingEnabled;
+const borrowTab = { name: "Borrow", href: "/borrow", icon: ArrowDownTrayIcon };
+const portfolioTab = { name: "Portfolio", href: "/portfolio", icon: CurrencyDollarIcon };
+
+// Build the tabs array based on feature flags
+const tabs = [
+  ...baseTabs,
+  ...(borrowingEnabled ? [borrowTab] : []),
+  portfolioTab,
 ];
 
 export const TabBar = () => {
