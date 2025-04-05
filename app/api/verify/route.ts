@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth"; // Adjust path if needed
 import { createClient } from "@supabase/supabase-js";
+import { ethers } from "ethers";
 
 // Ensure these are loaded server-side from environment variables
 // Use the names consistent with your .env.local file
@@ -11,6 +12,10 @@ const WLD_APP_ID = process.env.WLD_APP_ID!; // Your World ID App ID from environ
 
 // Initialize Supabase client with Service Role Key
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+function hashSignal(signal: string): string {
+  return ethers.solidityPackedKeccak256(["string"], [signal]);
+}
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +29,7 @@ export async function POST(request: Request) {
     const nextAuthSub = session.user.sub; // Logged-in user's identifier
 
     // 2. Get the verification payload object from the frontend request body
+    // This payload should contain the *raw* signal sent by the client
     const verificationPayload = await request.json();
 
     // 3. Basic validation on the received payload object from the client
@@ -32,8 +38,8 @@ export async function POST(request: Request) {
       !verificationPayload.proof ||
       !verificationPayload.merkle_root ||
       !verificationPayload.nullifier_hash ||
-      !verificationPayload.verification_level
-      // Optional: Add !verificationPayload.signal if signal is always expected
+      !verificationPayload.verification_level ||
+      !verificationPayload.signal // Ensure raw signal is present
     ) {
       // Log the invalid payload for debugging
       console.error(
@@ -43,39 +49,47 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Missing expected fields in verification payload from client (proof, merkle_root, nullifier_hash, verification_level required)",
+            "Missing expected fields in verification payload from client (proof, merkle_root, nullifier_hash, verification_level, signal required)",
         },
         { status: 400 }, // Bad Request
       );
     }
 
-    // 4. Prepare to call World ID Developer Portal /verify Endpoint - Using API V2
-    const verifyUrl = `https://developer.worldcoin.org/api/v2/verify/${WLD_APP_ID}`; // <-- Use v2 endpoint
+    // 4. Calculate the signal_hash from the received raw signal
+    const rawSignal = verificationPayload.signal; // The raw signal (e.g., user ID) from the frontend
+    const signalHash = hashSignal(rawSignal); // Calculate the Keccak-256 hash
+
+    // 5. Prepare to call World ID Developer Portal /verify Endpoint - Using API V2
+    const verifyUrl = `https://developer.worldcoin.org/api/v2/verify/${WLD_APP_ID}`; // Use v2 endpoint
     const actionName = "verify-humane-banque"; // Define action name clearly - MUST match Dev Portal
 
-    // Log key identifiers being sent to World ID API for debugging
+    // Log key identifiers being sent to World ID API for debugging, including the *hashed* signal
     console.log(`Verifying with World ID API V2 for Action: ${actionName}`, {
       WLD_APP_ID,
-      signal: verificationPayload.signal, // The signal provided by the client
-      nullifier_hash: verificationPayload.nullifier_hash, // The nullifier hash from the client proof
-      verification_level: verificationPayload.verification_level, // The verification level from the client proof
+      signal_hash: signalHash, // Log the hash being sent
+      nullifier_hash: verificationPayload.nullifier_hash, // Log the nullifier from the client
+      verification_level: verificationPayload.verification_level, // Log the level from the client
     });
 
-    // 5. Call the World ID Verification API (V2)
+    // 6. Call the World ID Verification API (V2)
     const verifyRes = await fetch(verifyUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // No Authorization header needed for V2 /verify typically
       },
-      // Pass the received payload directly, ensuring the action is correctly set/overridden
+      // Construct the body according to the curl example: send signal_hash, not raw signal
       body: JSON.stringify({
-        ...verificationPayload, // Spread all fields received from frontend (proof, merkle_root, nullifier_hash, signal, verification_level etc.)
-        action: actionName, // Ensure the correct action name is sent, matching the Action configured in the Dev Portal
+        merkle_root: verificationPayload.merkle_root,
+        nullifier_hash: verificationPayload.nullifier_hash,
+        proof: verificationPayload.proof,
+        verification_level: verificationPayload.verification_level,
+        action: actionName, // Action Name configured in Dev Portal
+        signal_hash: signalHash, // <-- Send the calculated hash
       }),
     });
 
-    // 6. Process the response from the World ID API
+    // 7. Process the response from the World ID API
     const verifyResultJson = await verifyRes.json();
     console.log("World ID V2 Verification Response Status:", verifyRes.status);
     console.log("World ID V2 Verification Response Body:", verifyResultJson);
@@ -87,7 +101,7 @@ export async function POST(request: Request) {
         "Unknown verification error from World ID V2";
       const errorCode = (verifyResultJson as { code?: string }).code;
       console.error(
-        "World ID V2 Verification Failed:", // <-- Log V2 failure
+        "World ID V2 Verification Failed:",
         errorDetail,
         "Code:",
         errorCode,
@@ -95,20 +109,20 @@ export async function POST(request: Request) {
       // Return the specific error from World ID API to the client
       return NextResponse.json(
         {
-          error: `World ID V2 Verification Failed: ${errorDetail}`, // <-- Indicate V2 error
+          error: `World ID V2 Verification Failed: ${errorDetail}`,
           code: errorCode,
         },
         { status: verifyRes.status }, // Use the status code returned by World ID API (e.g., 400)
       );
     }
 
-    // 7. Extract Verified Nullifier Hash from the successful World ID API response
-    // IMPORTANT: Use the nullifier hash returned by the API, not the one from the client payload initially
+    // 8. Extract Verified Nullifier Hash from the successful World ID API response
+    // IMPORTANT: Use the nullifier hash returned by the API for security/DB operations
     const verifiedNullifierHash = (
       verifyResultJson as { nullifier_hash?: string }
     ).nullifier_hash;
 
-    // Add extra check based on example - did v2 response explicitly say verified?
+    // Optional: Check 'verified' field if present in v2 response (belt-and-suspenders check)
     const isVerifiedByApi = (verifyResultJson as { verified?: boolean })
       .verified;
     if (isVerifiedByApi === false) {
@@ -142,7 +156,7 @@ export async function POST(request: Request) {
 
     // --- Database Operations (Using nextAuthSub from session and verifiedNullifierHash from World ID API) ---
 
-    // 8. Check if the verified World ID hash is on the defaulter list
+    // 9. Check if the verified World ID hash is on the defaulter list
     const { data: defaulterCheck, error: defaulterError } = await supabaseAdmin
       .from("defaulters")
       .select("id")
@@ -170,7 +184,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 9. Find or Create User Profile in Supabase linked to NextAuth identity
+    // 10. Find or Create User Profile in Supabase linked to NextAuth identity
     let profile;
     const { data: existingProfile, error: profileError } = await supabaseAdmin
       .from("profiles")
@@ -211,7 +225,7 @@ export async function POST(request: Request) {
       profile = existingProfile;
     }
 
-    // 10. Update Profile if Not Verified or if nullifier hash has changed
+    // 11. Update Profile if Not Verified or if nullifier hash has changed
     //    (Handles re-verification or linking World ID to an existing account)
     if (
       !profile.is_verified ||
@@ -269,7 +283,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 11. Return Success Response to the client
+    // 12. Return Success Response to the client
     // Include the verified nullifier hash, which might be useful client-side
     return NextResponse.json(
       { success: true, nullifier_hash: verifiedNullifierHash },
@@ -291,4 +305,4 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
+} // End of POST function
