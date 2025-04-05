@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Hooks",
+  "sourceName": "libraries/uniswap/Hooks.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea264697066735822122077c36f51b3c682d6760e8c04f88703b2ddeec4a4edb73675de2b58ccb3cab78764736f6c63430008140033",
+  "deployedBytecode": "0x600080fdfea264697066735822122077c36f51b3c682d6760e8c04f88703b2ddeec4a4edb73675de2b58ccb3cab78764736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
