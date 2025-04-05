@@ -1,99 +1,78 @@
 // Script to deploy the Humane Banque smart contracts
 const { ethers } = require("hardhat");
+require('dotenv').config({ path: '../.env' });
 
 async function main() {
-  console.log("Deploying Humane Banque contracts...");
+  console.log("Deploying Humane Banque contracts to World Chain...");
 
-  // Get the deployer account
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying with account:", deployer.address);
-
-  // You can use real addresses on mainnet or testnet
-  // For example on Sepolia:
-  // These are placeholder addresses - use real ones for production
-  const usdcAddress = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"; // USDC on Sepolia
-  const wldAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";   // Placeholder for WLD - use actual
-  const worldIdAddress = "0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260"; // Placeholder - use World ID verifier address
-  const poolManagerAddress = "0x64255ed21366DB9D34738bc434769319a1C75Ac0"; // Placeholder - use Uniswap V4 PoolManager
-  
-  // For testing on localhost, use mocks
-  let quoteToken, collateralToken, worldId, poolManager;
-  
-  if (network.name === "localhost" || network.name === "hardhat") {
-    // Use mocks for local testing
-    const MockERC20 = await ethers.getContractFactory("MockERC20");
-  
-    console.log("Deploying mock USDC token...");
-    quoteToken = await MockERC20.deploy("USD Coin", "USDC", 6);
-    await quoteToken.waitForDeployment();
-    console.log("USDC deployed at:", await quoteToken.getAddress());
-    
-    console.log("Deploying mock WLD token...");
-    collateralToken = await MockERC20.deploy("Worldcoin", "WLD", 18);
-    await collateralToken.waitForDeployment();
-    console.log("WLD deployed at:", await collateralToken.getAddress());
-    
-    // Deploy mock WorldID (for testing)
-    console.log("Deploying mock WorldID router...");
-    const MockWorldID = await ethers.getContractFactory("MockWorldID");
-    worldId = await MockWorldID.deploy();
-    await worldId.waitForDeployment();
-    console.log("WorldID router deployed at:", await worldId.getAddress());
-    
-    // Deploy mock PoolManager (for testing)
-    console.log("Deploying mock Uniswap V4 PoolManager...");
-    const MockPoolManager = await ethers.getContractFactory("MockPoolManager");
-    poolManager = await MockPoolManager.deploy();
-    await poolManager.waitForDeployment();
-    console.log("PoolManager deployed at:", await poolManager.getAddress());
-  } else {
-    // Use real addresses on testnet/mainnet
-    console.log("Using real contract addresses:");
-    console.log("USDC:", usdcAddress);
-    console.log("WLD:", wldAddress);
-    console.log("WorldID:", worldIdAddress);
-    console.log("PoolManager:", poolManagerAddress);
-    
-    quoteToken = { getAddress: async () => usdcAddress };
-    collateralToken = { getAddress: async () => wldAddress };
-    worldId = { getAddress: async () => worldIdAddress };
-    poolManager = { getAddress: async () => poolManagerAddress };
+  // Load environment variables
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
+  if (!PRIVATE_KEY) {
+    throw new Error("Missing PRIVATE_KEY environment variable");
   }
-  
+
+  const RPC_URL = process.env.ETH_RPC_URL || "https://worldchain.drpc.org";
+  console.log("Using RPC URL:", RPC_URL);
+
+  // Connect to the World Chain network
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
+  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  console.log("Deploying with account:", wallet.address);
+
+  // Get real addresses from environment variables
+  const worldIdAddress = process.env.WORLD_ID_ADDRESS;
+  const usdcAddress = process.env.QUOTE_TOKEN_ADDRESS;
+  const wldAddress = process.env.TOKEN1_ADDRESS;
+  const poolManagerAddress = process.env.POOL_MANAGER_ADDRESS;
+
+  console.log("Using contract addresses:");
+  console.log("USDC:", usdcAddress);
+  console.log("WLD:", wldAddress);
+  console.log("WorldID:", worldIdAddress);
+  console.log("PoolManager:", poolManagerAddress);
+
   // Deploy AuctionRepoHook
   console.log("Deploying AuctionRepoHook...");
-  const AuctionRepoHook = await ethers.getContractFactory("AuctionRepoHook");
+  const AuctionRepoHook = await ethers.getContractFactory("AuctionRepoHook", wallet);
   const auctionRepoHook = await AuctionRepoHook.deploy(
-    await poolManager.getAddress(),
-    await worldId.getAddress(),
-    await quoteToken.getAddress(),
-    deployer.address
+    poolManagerAddress,
+    worldIdAddress,
+    usdcAddress,
+    wallet.address
   );
   await auctionRepoHook.waitForDeployment();
   
-  console.log("AuctionRepoHook deployed at:", await auctionRepoHook.getAddress());
+  const hookAddress = await auctionRepoHook.getAddress();
+  console.log("AuctionRepoHook deployed at:", hookAddress);
   
-  // Setup initial market and collateral (for testing)
+  // Setup initial market and collateral
   console.log("Setting up initial configuration...");
   
   // Allow WLD as collateral
-  await auctionRepoHook.setCollateralAllowed(await collateralToken.getAddress(), true);
+  const tx1 = await auctionRepoHook.setCollateralAllowed(wldAddress, true);
+  await tx1.wait();
   console.log("WLD added as allowed collateral");
   
   // Add market with 30-day, 90-day, and 180-day terms
   const now = Math.floor(Date.now() / 1000);
   const day = 24 * 60 * 60;
   
-  await auctionRepoHook.addMarket(now + 30 * day);
+  const tx2 = await auctionRepoHook.addMarket(now + 30 * day);
+  await tx2.wait();
   console.log("Added 30-day market");
   
-  await auctionRepoHook.addMarket(now + 90 * day);
+  const tx3 = await auctionRepoHook.addMarket(now + 90 * day);
+  await tx3.wait();
   console.log("Added 90-day market");
   
-  await auctionRepoHook.addMarket(now + 180 * day);
+  const tx4 = await auctionRepoHook.addMarket(now + 180 * day);
+  await tx4.wait();
   console.log("Added 180-day market");
   
   console.log("Deployment and configuration complete!");
+  console.log("Update your .env with:");
+  console.log(`HOOK_ADDRESS="${hookAddress}"`);
+  console.log("\nNext, create the pool using CreatePoolWithHook.s.sol or another method");
 }
 
 // Execute deployment

@@ -24,21 +24,20 @@ module.exports = {
     hardhat: {
       chainId: 1337,
     },
-    // Add additional networks as needed:
-    // sepolia: {
-    //   url: process.env.SEPOLIA_URL || "",
-    //   accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-    // },
+    worldchain: {
+      url: process.env.ETH_RPC_URL || "https://worldchain.drpc.org",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 480,
+    },
   },
   etherscan: {
     // Your API key for Etherscan
     // apiKey: process.env.ETHERSCAN_API_KEY,
   },
-  // Custom resolver for Uniswap imports
-  customSolcPaths: {
-    "contracts/": "./contracts/",
-    "@uniswap/v4-core/contracts/interfaces/": "./interfaces/uniswap/",
-    "@uniswap/v4-core/contracts/libraries/": "./libraries/uniswap/",
-    "@uniswap/v4-core/contracts/types/": "./types/uniswap/"
+  // Aliases for solidity source locations
+  paths: {
+    sources: "./",
+    artifacts: "./artifacts",
+    cache: "./cache",
   }
 };

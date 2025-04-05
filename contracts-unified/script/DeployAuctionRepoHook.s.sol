@@ -46,10 +46,18 @@ contract DeployAuctionRepoHook is Script {
             ownerAddress
         );
         
-        bytes32 salt = bytes32(uint256(0));
+        // Deploy the hook with proper flags
+        address deployer = vm.addr(deployerPrivateKey);
+        bytes32 salt = HookMiner.find(
+            deployer,
+            flags,
+            type(AuctionRepoHook).creationCode,
+            constructorArgs,
+            0,
+            1000000
+        );
         
-        // In production, find salt using HookMiner.find to create address with correct flags:
-        // salt = HookMiner.find(CREATE2_DEPLOYER, flags, type(AuctionRepoHook).creationCode, constructorArgs);
+        console.log("Found salt for hook deployment:", vm.toString(salt));
         
         vm.startBroadcast(deployerPrivateKey);
         
