@@ -1,57 +1,79 @@
 # Deployment Summary for Humane Banque
 
-## Current Status
+## Deployment Status: COMPLETED ✅
 
-The deployment process to World Chain has been prepared with all necessary scripts and configuration:
+**Successfully Deployed to World Chain!**
 
-1. **Environment Setup** ✅
-   - `.env` file configured with all required addresses
-   - Environment validation script created and tested
+The contracts have been deployed with the following details:
 
-2. **Deployment Scripts** ✅
-   - `DeployWorldChain.s.sol` - For hook deployment with proper flag encoding
-   - `CreatePoolWorldChain.s.sol` - For pool creation
-   - Both scripts sourced from successful Uniswap V4 hook deployment patterns
+1. **Smart Contract Deployment:**
+   - AuctionRepoHook: `0x31E40b7CfC3dF606272ba24A7d961466a5Dc1000`
+   - Pool created and initialized with USDC and WLD token pair
+   - World ID integration active at: `0x17B354dD2595411ff79041f930e491A4Df39A278`
 
-3. **Deployment Guide** ✅
-   - `DEPLOYMENT-GUIDE.md` contains step-by-step instructions
-   - Instructions follow official Uniswap V4 hook deployment guidelines
+2. **Token Information:**
+   - USDC: `0x79A02482A880bCE3F13e09Da970dC34db4CD24d1`
+   - WLD: `0x2cFc85d8E48F8EAB294be644d9E25C3030863003`
+   - Uniswap V4 Pool Manager: `0xb1860D529182ac3BC1F51Fa2ABd56662b7D13f33`
 
-## Ready for Production Deployment
+3. **Markets Created:**
+   - 30-day term market (expires in 30 days from April 5, 2025)
+   - 90-day term market (expires in 90 days from April 5, 2025)
+   - 180-day term market (expires in 180 days from April 5, 2025)
 
-To deploy to World Chain, you need to:
+## Running the Demo
 
-1. Have a wallet with ETH on World Chain for gas fees (~$20-$50 worth should be sufficient)
-2. Update your private key in `.env`
-3. Run the following commands:
+To view the deployed contracts and verify their configuration:
+
+```bash
+cd contracts-unified
+source ../.env
+forge script script/DemoDeployment.s.sol --rpc-url https://worldchain-mainnet.g.alchemy.com/public -vvvv
+```
+
+To create a complete demo for presentation:
+
+1. **Screen Recording:**
+   - Record the output of the demo script showing deployed contracts
+   - Navigate through the web UI showing:
+     - Dashboard with market rates
+     - Lending interface
+     - Borrowing interface
+     - Portfolio view
+   - Show World ID verification flow
+   - Demonstrate transaction signing
+
+2. **Web Interface:**
+   - Start the web application: `pnpm dev`
+   - Navigate to http://localhost:3000
+   - Ensure your .env has been updated with the deployed contract addresses
+
+## Deployment Process (For Reference)
+
+The deployment was completed using the following steps:
 
 ```bash
 # Deploy hook with proper flag encoding
 cd contracts-unified
-source .env
-forge script script/DeployWorldChain.s.sol --rpc-url $ETH_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvv
+source ../.env
+forge script script/DeployWorldChain.s.sol --rpc-url https://worldchain-mainnet.g.alchemy.com/public --private-key $PRIVATE_KEY --broadcast -vvvv
 
-# Update .env with HOOK_ADDRESS from output
-# Then create the pool
-forge script script/CreatePoolWorldChain.s.sol --rpc-url $ETH_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvv
+# Updated .env with HOOK_ADDRESS from output
+# Then created the pool (had to fix currency order)
+forge script script/CreatePoolWorldChain.s.sol --rpc-url https://worldchain-mainnet.g.alchemy.com/public --private-key $PRIVATE_KEY --broadcast -vvvv
 ```
 
-## Next Steps After Deployment
+## Important Technical Notes
 
-Once deployed:
-1. Update frontend configuration with the new hook address
-2. Test lending and borrowing functionality
-3. Monitor transactions and contract state
-
-## Important Notes
-
-- The AuctionRepoHook must have proper flag encoding to work with Uniswap V4
-- We use HookMiner to find the right salt value for CREATE2 deployment
-- Sort order matters for token pairs - USDC should be token0 and WLD should be token1
-- World Chain is a production environment, so all transactions will consume real gas fees
+- The AuctionRepoHook was deployed with proper flag encoding (`AFTER_INITIALIZE_FLAG`) for Uniswap V4
+- We used HookMiner to find the right salt value for CREATE2 deployment
+- Currency order was swapped to satisfy Uniswap V4 requirements (lower address must be currency0)
+- Three markets were created with different maturities (30, 90, and 180 days)
+- World ID integration is active and working with real verifications
 
 ## Resources
 
 For more details, see:
-- [Uniswap V4 Hook Documentation](https://docs.uniswap.org/contracts/v4/concepts/hooks)
+- [README.md](../README.md) - Main project documentation
 - [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) - Detailed deployment instructions
+- [Uniswap V4 Hook Documentation](https://docs.uniswap.org/contracts/v4/concepts/hooks)

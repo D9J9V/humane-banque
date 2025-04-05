@@ -93,15 +93,39 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
    - Historical rate analysis
    - User profile and transaction history
 
-### Deployment Notice
+### Deployment Status
 
-The current version of Humane Banque is configured for demonstration purposes with the following considerations:
+**Successfully Deployed to World Chain!**
 
-- Initial deployment does not require pool liquidity to demonstrate the core lending/borrowing functionality
+The smart contracts have been deployed to World Chain with the following details:
+
+1. **Smart Contract Deployment:**
+   - AuctionRepoHook: `0x31E40b7CfC3dF606272ba24A7d961466a5Dc1000`
+   - Pool created and initialized with USDC and WLD token pair
+   - World ID integration active at: `0x17B354dD2595411ff79041f930e491A4Df39A278`
+
+2. **Token Information:**
+   - USDC: `0x79A02482A880bCE3F13e09Da970dC34db4CD24d1`
+   - WLD: `0x2cFc85d8E48F8EAB294be644d9E25C3030863003`
+   - Uniswap V4 Pool Manager: `0xb1860D529182ac3BC1F51Fa2ABd56662b7D13f33`
+
+3. **Markets Created:**
+   - 30-day term market
+   - 90-day term market
+   - 180-day term market
+
+To view deployment details, see [contracts-unified/README.md](./contracts-unified/README.md) or run the demo script:
+```bash
+cd contracts-unified
+forge script script/DemoDeployment.s.sol --rpc-url https://worldchain-mainnet.g.alchemy.com/public -vvvv
+```
+
+The current version is configured for demonstration with the following considerations:
+
 - Liquidations are currently disabled (`NEXT_PUBLIC_ENABLE_LIQUIDATIONS="false"`) in the default configuration
-- Later this month, we will introduce liquidity and enable liquidations once optimal parameters are determined
+- Later this month, we will introduce additional liquidity and enable liquidations once optimal parameters are determined
 - The `.env.example` file contains all necessary configuration variables for both current demo setup and future enhancements
-- For production deployment, additional security measures and parameter optimization will be implemented
+- For production use, additional security measures and parameter optimization will be implemented
 
 ## Design Philosophy
 
