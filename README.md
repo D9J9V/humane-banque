@@ -3,6 +3,11 @@
 
 **Date:** April 5, 2025
 
+## Project Structure
+
+- **Frontend**: Next.js app in the root directory
+- **Smart Contracts**: Unified in the [contracts-unified](./contracts-unified) directory
+
 Abstract:
 
 Current decentralized finance (DeFi) lending protocols often suffer from indefinite loan terms, leading to duration mismatch risks, and rely on unsustainable token subsidies for interest rates. Humane Banque introduces a new paradigm for DeFi lending and borrowing built on the robust infrastructure of Uniswap V4 and World ID's proof-of-humanity. By facilitating fixed-term, collateralized loans with market-driven rates exclusively between verified human participants, Humane Banque offers enhanced predictability, security, and long-term sustainability for consumer finance within the World App ecosystem.
@@ -46,10 +51,3 @@ Humane Banque functions like an on-chain repo market facilitated by a Uniswap V4
 Humane Banque represents a significant step forward in building a more stable, transparent, and human-centric DeFi. By combining the architectural innovations of Uniswap V4 with the foundational security of World ID, it offers a predictable and reliable platform for fixed-term lending and borrowing. It addresses critical flaws in existing models, paving the way for more sustainable and trustworthy financial applications within the growing World App ecosystem.
 
 ---
-Contracts:
-1. BaseHook.sol - The foundation contract that all hooks inherit from, providing Uniswap V4 hook functionality
-2. AuctionRepoHook.sol - The main implementation that inherits from BaseHook, containing the full auction-based lending protocol with WorldID verification
-3. VerifiedActionHook.sol - A simpler implementation focused on just the WorldID verification aspect
-4. LendingRepoMVPHook.sol - A simplified lending protocol without auctions for MVP testing
-
-IAuctionRepoHook.sol provides the interface for external applications to interact with the main contract.
