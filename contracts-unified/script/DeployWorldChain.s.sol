@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.20;
+pragma solidity ^0.8.26;
 
 import "forge-std/Script.sol";
-import {AuctionRepoHook} from "../src/AuctionRepoHook.sol";
+import {AuctionRepoHook, IWorldID} from "../src/AuctionRepoHook.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import "./utils/HookMiner.sol";
@@ -12,7 +12,17 @@ contract DeployWorldChain is Script {
     
     function run() external {
         // Setup deployer
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey;
+        try vm.envUint("PRIVATE_KEY") returns (uint256 key) {
+            deployerPrivateKey = key;
+        } catch {
+            // Try as hex string
+            string memory pkString = vm.envString("PRIVATE_KEY");
+            if (bytes(pkString)[0] != "0" || bytes(pkString)[1] != "x") {
+                pkString = string.concat("0x", pkString);
+            }
+            deployerPrivateKey = vm.parseUint(pkString);
+        }
         address deployer = vm.addr(deployerPrivateKey);
         vm.startBroadcast(deployerPrivateKey);
         
@@ -35,7 +45,7 @@ contract DeployWorldChain is Script {
         bytes memory creationCode = type(AuctionRepoHook).creationCode;
         bytes memory constructorArgs = abi.encode(
             poolManager,
-            worldId,
+            IWorldID(worldId),
             quoteToken,
             deployer
         );
@@ -52,7 +62,7 @@ contract DeployWorldChain is Script {
         // Deploy hook with the mined salt
         AuctionRepoHook hook = new AuctionRepoHook{salt: salt}(
             IPoolManager(poolManager),
-            worldId,
+            IWorldID(worldId),
             quoteToken,
             deployer
         );
@@ -83,7 +93,7 @@ contract DeployWorldChain is Script {
         
         console.log("Deployment and setup complete!");
         console.log("Update your .env with:");
-        console.log("HOOK_ADDRESS=" + vm.toString(address(hook)));
+        console.log("HOOK_ADDRESS=", vm.toString(address(hook)));
         
         vm.stopBroadcast();
     }

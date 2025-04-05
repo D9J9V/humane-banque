@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.20;
+pragma solidity ^0.8.26;
 
 /// @title HookMiner
 /// @notice Provides a function to find a salt that will produce a hook address with specific flags
