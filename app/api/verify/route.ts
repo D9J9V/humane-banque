@@ -66,9 +66,12 @@ export async function POST(request: Request) {
     // Log key identifiers being sent to World ID API for debugging, including the *hashed* signal
     console.log(`Verifying with World ID API V2 for Action: ${actionName}`, {
       WLD_APP_ID,
-      signal_hash: signalHash, // Log the hash being sent
-      nullifier_hash: verificationPayload.nullifier_hash, // Log the nullifier from the client
-      verification_level: verificationPayload.verification_level, // Log the level from the client
+      nullifier_hash: verificationPayload.nullifier_hash,
+      merkle_root: verificationPayload.merkle_root,
+      proof: verificationPayload.proof,
+      verification_level: verificationPayload.verification_level,
+      action: actionName, // Action Name configured in Dev Portal
+      signal_hash: signalHash, // Log the level from the client
     });
 
     // 6. Call the World ID Verification API (V2)
@@ -80,8 +83,8 @@ export async function POST(request: Request) {
       },
       // Construct the body according to the curl example: send signal_hash, not raw signal
       body: JSON.stringify({
-        merkle_root: verificationPayload.merkle_root,
         nullifier_hash: verificationPayload.nullifier_hash,
+        merkle_root: verificationPayload.merkle_root,
         proof: verificationPayload.proof,
         verification_level: verificationPayload.verification_level,
         action: actionName, // Action Name configured in Dev Portal
