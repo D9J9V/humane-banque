@@ -1,47 +1,53 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {IHooks} from "@uniswap/v4-core/contracts/interfaces/IHooks.sol";
 import {IPoolManager} from "@uniswap/v4-core/contracts/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/contracts/libraries/PoolKey.sol";
 import {BalanceDelta} from "@uniswap/v4-core/contracts/types/BalanceDelta.sol";
+import {Hooks} from "@uniswap/v4-core/contracts/libraries/Hooks.sol";
 
-abstract contract BaseHook is IHooks {
+// Define a simpler version without inheritance for our specific needs
+abstract contract BaseHook {
     IPoolManager public immutable poolManager;
 
     constructor(IPoolManager _poolManager) {
         poolManager = _poolManager;
     }
 
-    function beforeInitialize(address, PoolKey calldata, uint160, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.beforeInitialize.selector;
-    }
+    // Each contract needs to implement this
+    function getHookPermissions() public pure virtual returns (Hooks.Permissions memory);
 
-    function afterInitialize(PoolKey calldata, uint160, int24, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.afterInitialize.selector;
+    // For simplicity in our implementation
+    function afterInitialize(PoolKey calldata key, uint160, int24, bytes calldata) external virtual returns (bytes4) {
+        return this.afterInitialize.selector;
+    }
+    
+    // The following are simplified stubs for our purposes
+    function beforeInitialize(address, PoolKey calldata, uint160, bytes calldata) external virtual returns (bytes4) {
+        return this.beforeInitialize.selector;
     }
 
     function beforeModifyPosition(address, PoolKey calldata, IPoolManager.ModifyPositionParams calldata, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.beforeModifyPosition.selector;
+        return this.beforeModifyPosition.selector;
     }
 
     function afterModifyPosition(address, PoolKey calldata, IPoolManager.ModifyPositionParams calldata, BalanceDelta, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.afterModifyPosition.selector;
+        return this.afterModifyPosition.selector;
     }
 
     function beforeSwap(address, PoolKey calldata, IPoolManager.SwapParams calldata, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.beforeSwap.selector;
+        return this.beforeSwap.selector;
     }
 
     function afterSwap(address, PoolKey calldata, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.afterSwap.selector;
+        return this.afterSwap.selector;
     }
 
     function beforeDonate(address, PoolKey calldata, uint256, uint256, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.beforeDonate.selector;
+        return this.beforeDonate.selector;
     }
 
     function afterDonate(address, PoolKey calldata, uint256, uint256, bytes calldata) external virtual returns (bytes4) {
-        return IHooks.afterDonate.selector;
+        return this.afterDonate.selector;
     }
 }

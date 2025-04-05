@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import {IPoolManager} from "@uniswap/v4-core/contracts/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/contracts/libraries/PoolKey.sol";
 import {Hooks} from "@uniswap/v4-core/contracts/libraries/Hooks.sol";
-import {Currency} from "@uniswap/v4-core/contracts/libraries/CurrencyLibrary.sol";
+import {Currency, CurrencyLibrary} from "@uniswap/v4-core/contracts/libraries/CurrencyLibrary.sol";
 import {BaseHook} from "./BaseHook.sol";
 
 // Placeholder for World ID Interface
@@ -22,7 +22,7 @@ interface IWorldID {
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
@@ -211,15 +211,15 @@ contract AuctionRepoHook is BaseHook, Ownable, ReentrancyGuard {
         
         // Optional: Validate quote token presence if needed
         require(
-            Currency.unwrap(key.currency0) == quoteToken || 
-            Currency.unwrap(key.currency1) == quoteToken,
+            CurrencyLibrary.equals(key.currency0, quoteToken) || 
+            CurrencyLibrary.equals(key.currency1, quoteToken),
             "Pool must include quote token"
         );
         
         poolKey = key;
         emit PoolKeySet(key);
         
-        return IHooks.afterInitialize.selector;
+        return this.afterInitialize.selector;
     }
 
     // --- Admin Functions ---

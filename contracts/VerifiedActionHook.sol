@@ -67,7 +67,7 @@ contract VerifiedActionHook is BaseHook, Ownable {
 
     // --- Uniswap V4 Hook Overrides ---
 
-    function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
+    function getHookPermissions() public pure virtual override returns (Hooks.Permissions memory) {
         // Minimal permissions needed for this example
         return Hooks.Permissions({
             beforeInitialize: false,
@@ -81,7 +81,7 @@ contract VerifiedActionHook is BaseHook, Ownable {
         });
     }
 
-    function afterInitialize(PoolKey calldata key) public override {
+    function afterInitialize(PoolKey calldata key, uint160, int24, bytes calldata) external virtual override returns (bytes4) {
        // require(msg.sender == address(poolManager()), "Only PoolManager"); // May be handled by BaseHook
        require(key.hooks == address(this), "Invalid hook address in key");
        require(poolKey.hooks == address(0), "PoolKey already set");
@@ -91,6 +91,8 @@ contract VerifiedActionHook is BaseHook, Ownable {
 
        poolKey = key;
        emit PoolKeySet(key);
+       
+       return this.afterInitialize.selector;
     }
 
     // --- Internal Verification Logic ---

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "CurrencyLibrary",
+  "sourceName": "@uniswap/v4-core/contracts/libraries/CurrencyLibrary.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220362f524643595a5de1484e716b17655cfcb4631c845d487dea6d67a45cdab88a64736f6c63430008140033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220362f524643595a5de1484e716b17655cfcb4631c845d487dea6d67a45cdab88a64736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
