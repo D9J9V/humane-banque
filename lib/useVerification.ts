@@ -54,6 +54,7 @@ export const useVerification = () => {
     const userIdSignal = session.user.sub;
 
     console.log("Triggering World ID Verification Flow...");
+    console.log("Using signal (user sub):", userIdSignal);
     setIsVerifying(true);
     setVerificationError(null);
 
@@ -67,8 +68,10 @@ export const useVerification = () => {
       const result = await MiniKit.commandsAsync.verify({
         action: "verify-humane-banque",
         signal: userIdSignal,
-        verification_level: VerificationLevel.Orb, // Specify preference
+        verification_level: VerificationLevel.Orb,
       });
+
+      console.log("MiniKit result:", JSON.stringify(result));
 
       if (result.finalPayload.status === "error") {
         const errorCode = result.finalPayload.error_code || "UNKNOWN_ERROR";
@@ -77,43 +80,62 @@ export const useVerification = () => {
 
       // Successfully got proof from MiniKit, now verify with backend
       console.log("MiniKit verification successful, verifying with backend...");
+      
+      // Log the full MiniKit result for debugging
+      console.log("Full MiniKit result.finalPayload:", JSON.stringify(result.finalPayload, null, 2));
 
-      // Fixed: Extract properties including verification_level
-      const { proof, merkle_root, nullifier_hash, verification_level } =
-        result.finalPayload; // <--- ADD verification_level HERE
+      // Extract properties from the result
+      // Depending on MiniKit's response format, adjust this extraction
+      const proof = result.finalPayload.proof;
+      const merkle_root = result.finalPayload.merkle_root;
+      const nullifier_hash = result.finalPayload.nullifier_hash;
+      const verification_level = result.finalPayload.verification_level;
 
       if (!verification_level) {
-        // Add a check in case it's missing
         throw new Error("Verification level missing from MiniKit response.");
       }
+      
+      // Log individual extracted values
+      console.log("Proof:", proof);
+      console.log("Merkle Root:", merkle_root);
+      console.log("Nullifier Hash:", nullifier_hash);
+      console.log("Verification Level:", verification_level);
 
-      console.log(userIdSignal);
+      // Log extracted values for debugging
+      console.log("Extracted from MiniKit result:", {
+        proof,
+        merkle_root,
+        nullifier_hash,
+        verification_level,
+      });
+
+      // Create a payload with proper error checking
+      const backendPayload = {
+        proof: proof || "",
+        merkle_root: merkle_root || "",
+        nullifier_hash: nullifier_hash || "",
+        verification_level: verification_level || "orb",
+        action: "verify-humane-banque"
+      };
+      
+      console.log("Sending to backend API:", JSON.stringify(backendPayload));
+      
       // Send to our backend verify endpoint
       const verifyResponse = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          proof,
-          merkle_root,
-          nullifier_hash,
-          signal: userIdSignal, // Use the signal we sent to MiniKit
-          verification_level: verification_level, // <--- ADD verification_level HERE
-        }),
+        body: JSON.stringify(backendPayload),
       });
 
       const verifyResult = await verifyResponse.json();
 
       if (!verifyResponse.ok) {
-        // API returned an error
+        console.error("Server verification error:", JSON.stringify(verifyResult));
         throw new Error(verifyResult.error || "Verification failed on server");
       }
 
       // Update local state to reflect successful verification
       setIsVerified(true);
-
-      // No need to immediately re-check status after successful update
-      // setIsCheckingStatus(true); // Remove this line
-
       return verifyResult;
     } catch (error: any) {
       console.error("Error during verification process:", error);
