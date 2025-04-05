@@ -2,16 +2,16 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
-import {PoolManager} from "v4-core/src/PoolManager.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {PoolKey} from "v4-core/src/types/PoolKey.sol";
-import {Currency, CurrencyLibrary} from "v4-core/src/types/Currency.sol";
-import {Hooks} from "v4-core/src/libraries/Hooks.sol";
-import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
-import {TickMath} from "v4-core/src/libraries/TickMath.sol";
-import {LiquidityAmounts} from "v4-core/test/utils/LiquidityAmounts.sol";
-import {PositionManager} from "v4-periphery/src/PositionManager.sol";
-import {PoolModifyPositionRouter} from "v4-periphery/src/PoolModifyPositionRouter.sol";
+import {PoolManager} from "v4-core/PoolManager.sol";
+import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
+import {PoolKey} from "v4-core/types/PoolKey.sol";
+import {Currency, CurrencyLibrary} from "v4-core/types/Currency.sol";
+import {Hooks} from "v4-core/libraries/Hooks.sol";
+import {IHooks} from "v4-core/interfaces/IHooks.sol";
+import {TickMath} from "v4-core/libraries/TickMath.sol";
+// import {LiquidityAmounts} from "v4-core/test/utils/LiquidityAmounts.sol";
+// import {PositionManager} from "v4-periphery/PositionManager.sol";
+// import {PoolModifyPositionRouter} from "v4-periphery/PoolModifyPositionRouter.sol";
 import {AuctionRepoHook} from "../contracts/AuctionRepoHook.sol";
 
 contract CreatePoolWithHook is Script {
@@ -35,7 +35,7 @@ contract CreatePoolWithHook is Script {
         
         // Get Uniswap contracts
         IPoolManager poolManager = IPoolManager(poolManagerAddress);
-        PositionManager posm = PositionManager(posmAddress);
+        // PositionManager posm = PositionManager(posmAddress);
         
         // Create currency objects
         Currency currency0 = Currency.wrap(token0Address);
@@ -83,7 +83,11 @@ contract CreatePoolWithHook is Script {
             int24 tickLower = TickMath.minUsableTick(tickSpacing);
             int24 tickUpper = TickMath.maxUsableTick(tickSpacing);
             
-            // Add liquidity through the position manager
+            console.log("Would add liquidity in ticks:", tickLower, "to", tickUpper);
+            console.log("To add liquidity, use the PositionManager separately");
+            
+            // In actual deployment, use PositionManager:
+            /*
             bytes memory mintParams = abi.encode(
                 poolKey,
                 tickLower,
@@ -97,7 +101,7 @@ contract CreatePoolWithHook is Script {
             );
             
             posm.mint(mintParams, block.timestamp + 3600);
-            console.log("Liquidity added successfully");
+            */
         }
         
         vm.stopBroadcast();

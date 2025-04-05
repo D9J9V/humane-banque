@@ -8,35 +8,57 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
 
-  // In a real deployment, these would be real addresses
-  // For testing, we deploy mock contracts first
+  // You can use real addresses on mainnet or testnet
+  // For example on Sepolia:
+  // These are placeholder addresses - use real ones for production
+  const usdcAddress = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"; // USDC on Sepolia
+  const wldAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";   // Placeholder for WLD - use actual
+  const worldIdAddress = "0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260"; // Placeholder - use World ID verifier address
+  const poolManagerAddress = "0x64255ed21366DB9D34738bc434769319a1C75Ac0"; // Placeholder - use Uniswap V4 PoolManager
   
-  // Deploy mock tokens first (for testing)
-  const MockERC20 = await ethers.getContractFactory("MockERC20");
+  // For testing on localhost, use mocks
+  let quoteToken, collateralToken, worldId, poolManager;
   
-  console.log("Deploying mock USDC token...");
-  const quoteToken = await MockERC20.deploy("USD Coin", "USDC", 6);
-  await quoteToken.waitForDeployment();
-  console.log("USDC deployed at:", await quoteToken.getAddress());
+  if (network.name === "localhost" || network.name === "hardhat") {
+    // Use mocks for local testing
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
   
-  console.log("Deploying mock WLD token...");
-  const collateralToken = await MockERC20.deploy("Worldcoin", "WLD", 18);
-  await collateralToken.waitForDeployment();
-  console.log("WLD deployed at:", await collateralToken.getAddress());
-  
-  // Deploy mock WorldID (for testing)
-  console.log("Deploying mock WorldID router...");
-  const MockWorldID = await ethers.getContractFactory("MockWorldID");
-  const worldId = await MockWorldID.deploy();
-  await worldId.waitForDeployment();
-  console.log("WorldID router deployed at:", await worldId.getAddress());
-  
-  // Deploy mock PoolManager (for testing)
-  console.log("Deploying mock Uniswap V4 PoolManager...");
-  const MockPoolManager = await ethers.getContractFactory("MockPoolManager");
-  const poolManager = await MockPoolManager.deploy();
-  await poolManager.waitForDeployment();
-  console.log("PoolManager deployed at:", await poolManager.getAddress());
+    console.log("Deploying mock USDC token...");
+    quoteToken = await MockERC20.deploy("USD Coin", "USDC", 6);
+    await quoteToken.waitForDeployment();
+    console.log("USDC deployed at:", await quoteToken.getAddress());
+    
+    console.log("Deploying mock WLD token...");
+    collateralToken = await MockERC20.deploy("Worldcoin", "WLD", 18);
+    await collateralToken.waitForDeployment();
+    console.log("WLD deployed at:", await collateralToken.getAddress());
+    
+    // Deploy mock WorldID (for testing)
+    console.log("Deploying mock WorldID router...");
+    const MockWorldID = await ethers.getContractFactory("MockWorldID");
+    worldId = await MockWorldID.deploy();
+    await worldId.waitForDeployment();
+    console.log("WorldID router deployed at:", await worldId.getAddress());
+    
+    // Deploy mock PoolManager (for testing)
+    console.log("Deploying mock Uniswap V4 PoolManager...");
+    const MockPoolManager = await ethers.getContractFactory("MockPoolManager");
+    poolManager = await MockPoolManager.deploy();
+    await poolManager.waitForDeployment();
+    console.log("PoolManager deployed at:", await poolManager.getAddress());
+  } else {
+    // Use real addresses on testnet/mainnet
+    console.log("Using real contract addresses:");
+    console.log("USDC:", usdcAddress);
+    console.log("WLD:", wldAddress);
+    console.log("WorldID:", worldIdAddress);
+    console.log("PoolManager:", poolManagerAddress);
+    
+    quoteToken = { getAddress: async () => usdcAddress };
+    collateralToken = { getAddress: async () => wldAddress };
+    worldId = { getAddress: async () => worldIdAddress };
+    poolManager = { getAddress: async () => poolManagerAddress };
+  }
   
   // Deploy AuctionRepoHook
   console.log("Deploying AuctionRepoHook...");

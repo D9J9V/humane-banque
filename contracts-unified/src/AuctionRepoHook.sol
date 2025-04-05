@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity =0.8.20;
 
 // --- Interfaces ---
-import {IPoolManager} from "../interfaces/uniswap/IPoolManager.sol";
-import {PoolKey} from "../libraries/uniswap/PoolKey.sol";
-import {Hooks} from "../libraries/uniswap/Hooks.sol";
-import {Currency, CurrencyLibrary} from "../libraries/uniswap/CurrencyLibrary.sol";
+import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
+import {PoolKey} from "v4-core/types/PoolKey.sol";
+import {Hooks} from "v4-core/libraries/Hooks.sol";
+import {Currency, CurrencyLibrary} from "v4-core/types/Currency.sol";
 import {BaseHook} from "./BaseHook.sol";
 
 // Placeholder for World ID Interface

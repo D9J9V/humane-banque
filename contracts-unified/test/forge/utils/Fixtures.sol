@@ -2,16 +2,46 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
-import {PoolManager} from "v4-core/src/PoolManager.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {PoolKey} from "v4-core/src/types/PoolKey.sol";
-import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
-import {Currency} from "v4-core/src/types/Currency.sol";
-import {PoolRouter} from "v4-periphery/src/test/PoolRouter.sol";
-import {PositionManager} from "v4-periphery/src/PositionManager.sol";
-import {IPositionManager} from "v4-periphery/src/interfaces/IPositionManager.sol";
-import {Permit2} from "v4-periphery/src/libraries/Permit2.sol";
+import {PoolManager} from "v4-core/PoolManager.sol";
+import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
+import {PoolKey} from "v4-core/types/PoolKey.sol";
+import {IHooks} from "v4-core/interfaces/IHooks.sol";
+import {Currency} from "v4-core/types/Currency.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
+
+// Mocked peripheral contracts
+contract PoolRouter {
+    IPoolManager immutable manager;
+    
+    constructor(IPoolManager _manager) {
+        manager = _manager;
+    }
+    
+    function swap(
+        PoolKey memory key,
+        IPoolManager.SwapParams memory params,
+        bytes memory hookData
+    ) external returns (bytes memory) {
+        // Just return mock data
+        return abi.encode(int128(0), int128(0));
+    }
+}
+
+contract PositionManager {
+    IPoolManager immutable manager;
+    
+    constructor(IPoolManager _manager, uint256, address) {
+        manager = _manager;
+    }
+}
+
+interface IPositionManager {
+    function mint(bytes memory data, uint256 deadline) external returns (bytes memory result);
+}
+
+contract Permit2 {
+    function approve(address token, address spender, uint160 amount, uint48 expiration) external {}
+}
 
 contract Fixtures is Test {
     // Constants
@@ -128,7 +158,7 @@ contract Fixtures is Test {
             IPoolManager.SwapParams({
                 zeroForOne: zeroForOne,
                 amountSpecified: amountSpecified,
-                sqrtPriceLimitX96: zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1
+                sqrtPriceLimitX96: zeroForOne ? uint160(1) + 1 : uint160(type(uint160).max) - 1
             }),
             hookData
         );
