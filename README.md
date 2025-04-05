@@ -7,6 +7,7 @@
 
 - **Frontend**: Next.js app in the root directory
 - **Smart Contracts**: Unified in the [contracts-unified](./contracts-unified) directory
+- **Integration Layer**: Services in the [lib](./lib) directory connect frontend to contracts
 
 ## Overview
 
@@ -60,19 +61,30 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
   - Auction-based rate discovery
   - Liquidation mechanisms
 
+- **Frontend-Contract Integration:**
+  - Contract service layer with ethers.js
+  - Transaction signing via MiniKit
+  - Wallet connection status component
+  - Environment-based configuration management
+  - Real-time market data display
+  - Lending form with contract interaction
+
 ### Next Steps
 
-1. **Integration:**
-   - Connect frontend to smart contracts
-   - Implement transaction signing via MiniKit
-   
-2. **Complete User Flows:**
+1. **Complete User Flows:**
    - Finish Borrow screen and logic
    - Add portfolio management features
+   - Implement loan claiming and repayment UI
    
-3. **Testing & Security:**
+2. **Testing & Security:**
    - Comprehensive contract audits
    - Frontend testing and error handling
+   - Error boundaries and fallback UI
+   
+3. **Performance & UX Improvements:**
+   - Add transaction status monitoring
+   - Implement loading state optimizations
+   - Add advanced analytics dashboard
 
 ## Design Philosophy
 
@@ -90,9 +102,9 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
 - `pnpm tsc` - Run TypeScript type checking
-- `pnpm compile` - Compile smart contracts
-- `pnpm test` - Run contract tests
-- `pnpm deploy` - Deploy contracts
+- `pnpm compile` - Compile smart contracts (run in contracts-unified directory)
+- `pnpm test` - Run contract tests (run in contracts-unified directory)
+- `pnpm deploy` - Deploy contracts (run in contracts-unified directory)
 
 ### Code Style
 - **Imports:** Group by external, internal (@/), and relative paths
@@ -103,3 +115,5 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
 - **Formatting:** Follow Next.js/React best practices, use tailwindcss
 - **Authentication:** Use next-auth with Worldcoin provider
 - **API Routes:** Place in app/api with proper error handling
+- **Contract Interaction:** Use ethers.js via the contracts service
+- **Environment Config:** Use config.ts for environment-specific settings
