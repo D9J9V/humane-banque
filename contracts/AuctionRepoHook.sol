@@ -211,8 +211,8 @@ contract AuctionRepoHook is BaseHook, Ownable, ReentrancyGuard {
         
         // Optional: Validate quote token presence if needed
         require(
-            CurrencyLibrary.equals(key.currency0, quoteToken) || 
-            CurrencyLibrary.equals(key.currency1, quoteToken),
+            Currency.unwrap(key.currency0) == quoteToken || 
+            Currency.unwrap(key.currency1) == quoteToken,
             "Pool must include quote token"
         );
         

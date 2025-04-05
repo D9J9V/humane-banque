@@ -110,7 +110,7 @@
             }
           ],
           "internalType": "struct PoolKey",
-          "name": "key",
+          "name": "",
           "type": "tuple"
         },
         {

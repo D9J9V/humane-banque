@@ -18,7 +18,7 @@ abstract contract BaseHook {
     function getHookPermissions() public pure virtual returns (Hooks.Permissions memory);
 
     // For simplicity in our implementation
-    function afterInitialize(PoolKey calldata key, uint160, int24, bytes calldata) external virtual returns (bytes4) {
+    function afterInitialize(PoolKey calldata, uint160, int24, bytes calldata) external virtual returns (bytes4) {
         return this.afterInitialize.selector;
     }
     

@@ -1,30 +1,3 @@
-## This template provides a minimal setup to get Next.js working with MiniKit
-
-## Setup
-
-To run as a mini app choose a production app in the dev portal and use NGROK to tunnel. Set the `NEXTAUTH_URL` and the redirect url if using sign in with worldcoin to that ngrok url
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-To use the application, you'll need to:
-
-1. **Get World ID Credentials**
-   From the [World ID Developer Portal](https://developer.worldcoin.org/):
-
-   - Create a new app to get your `APP_ID`
-   - Get `DEV_PORTAL_API_KEY` from the API Keys section
-   - Navigate to "Sign in with World ID" page to get:
-     - `WLD_CLIENT_ID`
-     - `WLD_CLIENT_SECRET`
-
-2. **Configure Action**
-   - In the Developer Portal, create an action in the "Incognito Actions" section
-   - Use the same action name in `components/Verify/index.tsx`
-
-View docs: [Docs](https://docs.world.org/)
-
-[Developer Portal](https://developer.worldcoin.org/)
----
 # Humane Banque
 **Secure Fixed-Term DeFi Lending for Verified Humans**
 
@@ -73,3 +46,10 @@ Humane Banque functions like an on-chain repo market facilitated by a Uniswap V4
 Humane Banque represents a significant step forward in building a more stable, transparent, and human-centric DeFi. By combining the architectural innovations of Uniswap V4 with the foundational security of World ID, it offers a predictable and reliable platform for fixed-term lending and borrowing. It addresses critical flaws in existing models, paving the way for more sustainable and trustworthy financial applications within the growing World App ecosystem.
 
 ---
+Contracts:
+1. BaseHook.sol - The foundation contract that all hooks inherit from, providing Uniswap V4 hook functionality
+2. AuctionRepoHook.sol - The main implementation that inherits from BaseHook, containing the full auction-based lending protocol with WorldID verification
+3. VerifiedActionHook.sol - A simpler implementation focused on just the WorldID verification aspect
+4. LendingRepoMVPHook.sol - A simplified lending protocol without auctions for MVP testing
+
+IAuctionRepoHook.sol provides the interface for external applications to interact with the main contract.

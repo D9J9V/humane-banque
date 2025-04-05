@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/d9j9v/Code/humane-banque/contracts/AuctionRepoHook.sol": {
-      "lastModificationDate": 1743841054342,
-      "contentHash": "f9563df68a663095b2d64f8361f2db42",
+      "lastModificationDate": 1743841487029,
+      "contentHash": "d269112a3c1bce4e0b40182dc608fa3d",
       "sourceName": "contracts/AuctionRepoHook.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -51,8 +51,8 @@
       ]
     },
     "/Users/d9j9v/Code/humane-banque/contracts/BaseHook.sol": {
-      "lastModificationDate": 1743840986043,
-      "contentHash": "b0a36ec6a1a28e49fa225ee5b80d7b32",
+      "lastModificationDate": 1743841483655,
+      "contentHash": "c9ffe5af6ccf175f79c54b9fa481e5f9",
       "sourceName": "contracts/BaseHook.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1061,6 +1061,45 @@
       ],
       "artifacts": [
         "MockWorldID"
+      ]
+    },
+    "/Users/d9j9v/Code/humane-banque/contracts/interfaces/IAuctionRepoHook.sol": {
+      "lastModificationDate": 1743841162801,
+      "contentHash": "f65093a4a71b47bcb123c18489d4a4a7",
+      "sourceName": "contracts/interfaces/IAuctionRepoHook.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/contracts/libraries/PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IAuctionRepoHook"
       ]
     }
   }
