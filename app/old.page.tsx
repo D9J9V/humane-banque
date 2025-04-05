@@ -1,6 +1,6 @@
-import { PayBlock } from "@/components/Pay";
-import { SignIn } from "@/components/SignIn";
-import { VerifyBlock } from "@/components/Verify";
+import { PayBlock } from "@/components/(legacy)/Pay";
+import { SignIn } from "@/components/(legacy)/SignIn";
+import { VerifyBlock } from "@/components/(legacy)/Verify";
 
 export default function Home() {
   return (

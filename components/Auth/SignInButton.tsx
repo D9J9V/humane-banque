@@ -6,18 +6,10 @@ export const SignInButton = () => {
   if (session) {
     return (
       <div className="flex items-center gap-2">
-        {/* Optional: User info display */}
-        {/* <span className="text-sm hidden sm:block">
-           {session.user?.name ? `Hi, ${session.user.name.split(" ")[0]}` : "Signed In"}
-         </span> */}
+        {/* ... existing dropdown ... */}
         <div className="dropdown dropdown-end">
           <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-            <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
-              {/* Placeholder avatar - replace with actual image or initials if available */}
-              <span className="text-neutral-content text-xs">
-                {session.user?.name?.[0] || "U"}
-              </span>
-            </div>
+            {/* ... avatar content ... */}
           </label>
           <ul
             tabIndex={0}
@@ -25,34 +17,24 @@ export const SignInButton = () => {
           >
             <li>
               <span className="justify-between">
-                {session.user?.name
-                  ? `${session.user.name.split(" ")[0]}`
-                  : "Profile"}
+                {/* Use session.user.sub from the JWT/Session callback */}
+                {session.user?.name ?? "Profile"}
                 <span className="badge badge-ghost badge-sm">
-                  {/* Display first 6 chars of subject ID as a concise identifier */}
                   {session.user?.sub?.slice(0, 6) ?? "???"}...
                 </span>
               </span>
             </li>
-            {/* Add other profile/settings links here */}
             <li>
               <a onClick={() => signOut()}>Logout</a>
             </li>
           </ul>
         </div>
-
-        {/* Original Sign Out button - can be removed if using dropdown */}
-        {/* <button
-          onClick={() => signOut()}
-          className="btn btn-outline btn-error btn-sm"
-        >
-          Sign Out
-        </button> */}
       </div>
     );
   } else {
     return (
       <button
+        // Ensure this 'worldcoin' matches the provider ID in authOptions
         onClick={() => signIn("worldcoin")}
         className="btn btn-primary btn-sm"
       >

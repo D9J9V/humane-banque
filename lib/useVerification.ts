@@ -13,7 +13,7 @@ export const useVerification = () => {
   );
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
 
-  // Function to check verification status with the backend
+  // ... (checkVerification and useEffect remain the same) ...
   const checkVerification = useCallback(async (): Promise<boolean> => {
     if (!session?.user?.sub || isCheckingStatus) return isVerified;
 
@@ -37,15 +37,13 @@ export const useVerification = () => {
     }
   }, [session?.user?.sub, isVerified, isCheckingStatus]);
 
-  // Check verification status from the backend when session changes
-  // Fixed by adding checkVerification to dependency array
   useEffect(() => {
     if (sessionStatus === "authenticated" && session?.user?.sub) {
       checkVerification();
     } else if (sessionStatus === "unauthenticated") {
       setIsVerified(false);
     }
-  }, [sessionStatus, session?.user?.sub, checkVerification]); // Added checkVerification here
+  }, [sessionStatus, session?.user?.sub, checkVerification]);
 
   const triggerVerification = useCallback(async () => {
     if (!session?.user?.sub || isVerifying) {
@@ -69,7 +67,7 @@ export const useVerification = () => {
       const result = await MiniKit.commandsAsync.verify({
         action: "verify-humane-banque",
         signal: userIdSignal,
-        verification_level: VerificationLevel.Orb,
+        verification_level: VerificationLevel.Orb, // Specify preference
       });
 
       if (result.finalPayload.status === "error") {
@@ -80,9 +78,14 @@ export const useVerification = () => {
       // Successfully got proof from MiniKit, now verify with backend
       console.log("MiniKit verification successful, verifying with backend...");
 
-      // Fixed: Extract only the properties that exist on the success payload
-      // Remove signal - it's not in the response, we'll use the one we sent
-      const { proof, merkle_root, nullifier_hash } = result.finalPayload;
+      // Fixed: Extract properties including verification_level
+      const { proof, merkle_root, nullifier_hash, verification_level } =
+        result.finalPayload; // <--- ADD verification_level HERE
+
+      if (!verification_level) {
+        // Add a check in case it's missing
+        throw new Error("Verification level missing from MiniKit response.");
+      }
 
       // Send to our backend verify endpoint
       const verifyResponse = await fetch("/api/verify", {
@@ -93,6 +96,7 @@ export const useVerification = () => {
           merkle_root,
           nullifier_hash,
           signal: userIdSignal, // Use the signal we sent to MiniKit
+          verification_level: verification_level, // <--- ADD verification_level HERE
         }),
       });
 
@@ -106,8 +110,8 @@ export const useVerification = () => {
       // Update local state to reflect successful verification
       setIsVerified(true);
 
-      // After successful verification, no need to check again
-      setIsCheckingStatus(true);
+      // No need to immediately re-check status after successful update
+      // setIsCheckingStatus(true); // Remove this line
 
       return verifyResult;
     } catch (error: any) {
@@ -119,7 +123,7 @@ export const useVerification = () => {
     } finally {
       setIsVerifying(false);
     }
-  }, [session?.user?.sub, isVerifying]);
+  }, [session?.user?.sub, isVerifying]); // Removed checkVerification from deps as it's not directly used here
 
   return {
     isVerified,

@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
+  useSecureCookies: true, // <--- ADD THIS: Explicitly use secure cookies for HTTPS
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     {
@@ -43,5 +44,21 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
   },
+  // --- ADD THIS SECTION for explicit cookie configuration ---
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`, // Use secure prefix
+      options: {
+        httpOnly: true,
+        sameSite: "none", // Important for cross-site context (WebView)
+        path: "/",
+        secure: true, // Required for SameSite=None
+      },
+    },
+    // Consider adding for others if needed, start with sessionToken
+    // callbackUrl: { name: `__Secure-next-auth.callback-url`, options: { sameSite: 'none', path: '/', secure: true } },
+    // csrfToken: { name: `__Host-next-auth.csrf-token`, options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true } },
+  },
+  // ---------------------------------------------------------
   debug: process.env.NODE_ENV === "development",
 };

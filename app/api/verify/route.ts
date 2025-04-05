@@ -5,13 +5,12 @@ import { createClient } from "@supabase/supabase-js";
 import type { MiniAppVerifyActionSuccessPayload } from "@worldcoin/minikit-js"; // Get the correct type
 
 // Ensure these are loaded server-side from environment variables
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_URL = process.env.SUPABASE_URL!; // Removed NEXT_PUBLIC_
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const DEV_PORTAL_API_KEY = process.env.DEV_PORTAL_API_KEY!;
-const WLD_APP_ID = process.env.NEXT_PUBLIC_WLD_APP_ID!; // Your World ID App ID
+//const DEV_PORTAL_API_KEY = process.env.DEV_PORTAL_API_KEY!; // <-- Verify if needed for /verify
+const WLD_APP_ID = process.env.WLD_APP_ID!; // Removed NEXT_PUBLIC_
 
 // Initialize Supabase client with Service Role Key - ONLY FOR SERVER-SIDE USE
-// Consider creating a reusable server-side client instance in a lib file
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function POST(request: Request) {
@@ -23,17 +22,22 @@ export async function POST(request: Request) {
     }
     const nextAuthSub = session.user.sub;
 
-    // 2. Get Proof from Request Body
+    // 2. Get Proof from Request Body - ADD verification_level
     const {
       proof,
       merkle_root,
       signal,
       nullifier_hash: clientNullifierHash,
+      verification_level, // <--- ADD verification_level HERE
     } = await request.json(); // Destructure expected fields from MiniKit
 
-    if (!proof || !merkle_root || !clientNullifierHash) {
+    // UPDATE validation check
+    if (!proof || !merkle_root || !clientNullifierHash || !verification_level) {
       return NextResponse.json(
-        { error: "Missing verification parameters" },
+        {
+          error:
+            "Missing verification parameters (proof, merkle_root, nullifier_hash, verification_level required)",
+        },
         { status: 400 },
       );
     }
@@ -42,28 +46,31 @@ export async function POST(request: Request) {
     const verifyUrl = `https://developer.worldcoin.org/api/v1/verify/${WLD_APP_ID}`;
     console.log("Verifying with World ID:", {
       WLD_APP_ID,
+      action: "verify-humane-banque", // Ensure correct action name
       merkle_root,
       clientNullifierHash,
-      proof,
+      // proof, // Avoid logging the full proof unless absolutely necessary for debug
       signal,
+      verification_level, // Log the level being sent
     }); // Log for debugging
 
     const verifyRes = await fetch(verifyUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${DEV_PORTAL_API_KEY}`, // Use API Key for auth
+        // Authorization: `Bearer ${DEV_PORTAL_API_KEY}`, // <-- Double-check if this header is still required
       },
       body: JSON.stringify({
         merkle_root: merkle_root,
         nullifier_hash: clientNullifierHash,
         proof: proof,
         signal: signal, // Include signal if you're using one
-        action: "verify-humane-banque", // IMPORTANT: Use the Action Name configured in Dev Portal! Ensure it matches your VerifyButton config
-        // action_id: "YOUR_ACTION_ID" // DEPRECATED - Use action name string above
+        action: "verify-humane-banque", // IMPORTANT: Use the Action Name configured in Dev Portal!
+        verification_level: verification_level, // <--- ADD verification_level HERE
       }),
     });
 
+    // ... (Rest of the code remains the same: handling response, checking defaulters, updating profile) ...
     const verifyResultJson = await verifyRes.json();
 
     console.log("World ID Verification Response Status:", verifyRes.status);
@@ -91,7 +98,6 @@ export async function POST(request: Request) {
     }
 
     // If verifyRes.ok is true, the verification was successful according to World ID API
-    // Now, extract the nullifier hash directly from the response body
     const verifiedNullifierHash = (
       verifyResultJson as { nullifier_hash?: string }
     ).nullifier_hash;
@@ -105,18 +111,16 @@ export async function POST(request: Request) {
           error:
             "Verification successful but nullifier hash missing in response.",
         },
-        { status: 500 }, // Internal Server Error - unexpected response format
+        { status: 500 },
       );
     }
 
     // --- Database Operations ---
-
-    // 4. Check Defaulter List (Using the verified hash)
     const { data: defaulterCheck, error: defaulterError } = await supabaseAdmin
       .from("defaulters")
       .select("id")
       .eq("nullifier_hash", verifiedNullifierHash)
-      .maybeSingle(); // Use maybeSingle to handle 0 or 1 result gracefully
+      .maybeSingle();
 
     if (defaulterError) {
       console.error("Error checking defaulter list:", defaulterError);
@@ -135,16 +139,15 @@ export async function POST(request: Request) {
             "Verification failed: Associated identity has previously defaulted.",
         },
         { status: 403 },
-      ); // Forbidden
+      );
     }
 
-    // 5. Find User Profile in Supabase
     let profile;
     const { data: existingProfile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, is_verified") // Select existing status
+      .select("id, is_verified")
       .eq("next_auth_sub", nextAuthSub)
-      .maybeSingle(); // Use maybeSingle to handle 0 or 1 result gracefully
+      .maybeSingle();
 
     if (profileError) {
       console.error("Error finding profile:", profileError);
@@ -154,18 +157,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // If no profile exists, create one
     if (!existingProfile) {
       console.log(
         `No profile found for user ${nextAuthSub}. Creating one now.`,
       );
-
       const { data: newProfile, error: createError } = await supabaseAdmin
         .from("profiles")
         .insert({ next_auth_sub: nextAuthSub })
         .select("id, is_verified")
         .single();
-
       if (createError || !newProfile) {
         console.error("Error creating profile:", createError);
         return NextResponse.json(
@@ -173,38 +173,33 @@ export async function POST(request: Request) {
           { status: 500 },
         );
       }
-
       profile = newProfile;
       console.log(`Created new profile ${profile.id} for user ${nextAuthSub}`);
     } else {
       profile = existingProfile;
     }
 
-    // 6. Update Profile if Not Already Verified
     if (!profile.is_verified) {
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
           is_verified: true,
-          world_id_nullifier_hash: verifiedNullifierHash, // Store the verified hash
+          world_id_nullifier_hash: verifiedNullifierHash,
         })
-        .eq("id", profile.id); // Update using the profile's primary key
-
+        .eq("id", profile.id);
       if (updateError) {
         console.error(
           "Error updating profile verification status:",
           updateError,
         );
-        // Handle potential unique constraint violation if nullifier hash already exists for another user (should be rare if World ID works)
         if (updateError.code === "23505") {
-          // Unique violation code in Postgres
           return NextResponse.json(
             {
               error:
                 "This World ID has already been linked to another account.",
             },
             { status: 409 },
-          ); // Conflict
+          );
         }
         return NextResponse.json(
           { error: "Failed to update profile verification status" },
@@ -214,10 +209,8 @@ export async function POST(request: Request) {
       console.log(`Profile ${profile.id} successfully verified.`);
     } else {
       console.log(`Profile ${profile.id} was already verified.`);
-      // Optional: Check if stored nullifier matches the newly verified one. Log warning if different.
     }
 
-    // 7. Return Success Response
     return NextResponse.json(
       { success: true, nullifier_hash: verifiedNullifierHash },
       { status: 200 },
