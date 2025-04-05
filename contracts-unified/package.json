@@ -5,7 +5,13 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.js"
+    "test:forge": "forge test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:hook": "hardhat run scripts/deploy-hook.js",
+    "build:forge": "forge build",
+    "forge:install": "forge install foundry-rs/forge-std uniswap/v4-core uniswap/v4-periphery",
+    "forge:update": "forge update",
+    "forge:clean": "forge clean"
   },
   "dependencies": {
     "@uniswap/v4-core": "^1.0.1",

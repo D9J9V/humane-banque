@@ -124,3 +124,5 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
 - **API Routes:** Place in app/api with proper error handling
 - **Contract Interaction:** Use ethers.js via the contracts service
 - **Environment Config:** Use config.ts for environment-specific settings
+---
+Ahora quiero asegurarnos de incluir en el Readme una sección apuntando a las partes de la implementación de World y otra a la implementación de Uniswap. Sé que la app está desoptimizada desde el pov de UI, de hecho de acuerdo al readme es una de las siguientes cosas por hacer. World tiene un UI kit, estoy seguro de que siguiendo las mejores prácticas del mismo y usando Daisyui 5 se verá muy bien. https://docs.world.org/mini-apps/design/app-guidelines https://docs.world.org/mini-apps/design/ui-kit https://mini-apps-ui-kit.world.org/
