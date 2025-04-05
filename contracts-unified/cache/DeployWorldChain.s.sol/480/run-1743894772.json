@@ -1,0 +1,19 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://worldchain-mainnet.g.alchemy.com/public"
+    },
+    {
+      "rpc": "https://worldchain-mainnet.g.alchemy.com/public"
+    },
+    {
+      "rpc": "https://worldchain-mainnet.g.alchemy.com/public"
+    },
+    {
+      "rpc": "https://worldchain-mainnet.g.alchemy.com/public"
+    },
+    {
+      "rpc": "https://worldchain-mainnet.g.alchemy.com/public"
+    }
+  ]
+}
