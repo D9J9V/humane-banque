@@ -1,168 +1,130 @@
 "use client";
-// VERY IMPORTANT: This is a placeholder/simulation.
-// In a real app, verification status should ideally be:
-// 1. Fetched from your backend (which checks the blockchain/proof).
-// 2. Stored securely, perhaps linked to the user's session or profile.
-// 3. Re-validated periodically or as needed.
-// This hook just uses simple React state for demonstration.
 
 import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
-// Add necessary MiniKit imports if not globally available (might need to import types)
-import {
-  MiniKit,
-  VerificationLevel,
-  MiniAppVerifyActionErrorPayload,
-  ISuccessResult,
-} from "@worldcoin/minikit-js";
-// Simulate fetching/storing verification status
-// In a real app, this might involve an API call on session load
-const getInitialVerificationStatus = (): boolean => {
-  if (typeof window !== "undefined") {
-    return sessionStorage.getItem("isUserVerified") === "true";
-  }
-  return false;
-};
-
-const setVerificationStatus = (isVerified: boolean) => {
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem("isUserVerified", String(isVerified));
-  }
-};
+import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 
 export const useVerification = () => {
   const { data: session, status: sessionStatus } = useSession();
-  const [isVerified, setIsVerified] = useState<boolean>(
-    getInitialVerificationStatus(),
-  );
+  const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [verificationError, setVerificationError] = useState<string | null>(
     null,
   );
+  const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
 
-  // Reset verification status if user logs out
-  useEffect(() => {
-    if (sessionStatus === "unauthenticated") {
-      setVerificationStatus(false);
-      setIsVerified(false);
-    } else if (sessionStatus === "authenticated") {
-      // Re-check stored status when session becomes available
-      setIsVerified(getInitialVerificationStatus());
-    }
-  }, [sessionStatus]);
-
+  // Function to check verification status with the backend
   const checkVerification = useCallback(async (): Promise<boolean> => {
-    // In real app: Call your backend to check verification status for the logged-in user
-    // For now, we just return the state
-    console.log("Checking verification status (simulated):", isVerified);
-    return isVerified;
-  }, [isVerified]);
+    if (!session?.user?.sub || isCheckingStatus) return isVerified;
+
+    setIsCheckingStatus(true);
+    try {
+      const response = await fetch("/api/user/verified");
+      const data = await response.json();
+
+      if (response.ok && data.isVerified) {
+        setIsVerified(true);
+        return true;
+      } else {
+        setIsVerified(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking verification status:", error);
+      return isVerified; // Return current state on error
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  }, [session?.user?.sub, isVerified, isCheckingStatus]);
+
+  // Check verification status from the backend when session changes
+  // Fixed by adding checkVerification to dependency array
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && session?.user?.sub) {
+      checkVerification();
+    } else if (sessionStatus === "unauthenticated") {
+      setIsVerified(false);
+    }
+  }, [sessionStatus, session?.user?.sub, checkVerification]); // Added checkVerification here
 
   const triggerVerification = useCallback(async () => {
-    if (!session || isVerifying) {
+    if (!session?.user?.sub || isVerifying) {
       console.log("Cannot verify: No session or already verifying.");
-      return null; // Or throw error
+      return null;
     }
 
-    // ----- FIX START -----
-    // Explicitly check for session.user and session.user.sub
-    // We need 'sub' which comes from our custom session type (see next step)
-    const userIdSignal = session.user?.sub;
-
-    if (!userIdSignal) {
-      console.error("Cannot verify: User ID (sub) not found in session.");
-      setVerificationError("User identifier missing from session.");
-      return null; // Can't proceed without a signal
-    }
-    // ----- FIX END -----
+    const userIdSignal = session.user.sub;
 
     console.log("Triggering World ID Verification Flow...");
     setIsVerifying(true);
     setVerificationError(null);
 
-    // Reuse logic from the original VerifyBlock
     try {
       if (!MiniKit.isInstalled()) {
-        console.warn("Tried to invoke 'verify', but MiniKit is not installed.");
+        console.warn("MiniKit is not installed.");
         throw new Error("MiniKit not installed");
       }
 
-      const verifyPayload = {
-        action:
-          process.env.NEXT_PUBLIC_WLD_ACTION_NAME || "humane-banque-verify", // Use env var
-        signal: userIdSignal, // Use user's unique ID from session as signal
+      // Execute the verification with MiniKit
+      const result = await MiniKit.commandsAsync.verify({
+        action: "verify-humane-banque",
+        signal: userIdSignal,
         verification_level: VerificationLevel.Orb,
-      };
-      console.log("Using verification payload:", verifyPayload);
+      });
 
-      const { finalPayload } =
-        await MiniKit.commandsAsync.verify(verifyPayload);
-
-      if (finalPayload.status === "error") {
-        console.error("MiniKit verification command error:", finalPayload);
-
-        // ----- CORRECTED FIX START -----
-        // Access the correct properties from MiniAppVerifyActionErrorPayload.
-        // According to the type definition, only 'error_code' is available for error details.
-        const errorCode = finalPayload.error_code || "UNKNOWN_CODE"; // Provide fallback
-        // Remove access to 'finalPayload.detail' as it doesn't exist on the type.
-        setVerificationError(`MiniKit Error: ${errorCode}`);
-        // ----- CORRECTED FIX END -----
-
-        setIsVerified(false);
-        setVerificationStatus(false);
-        setIsVerifying(false); // Make sure this is set
-        return null;
+      if (result.finalPayload.status === "error") {
+        const errorCode = result.finalPayload.error_code || "UNKNOWN_ERROR";
+        throw new Error(`MiniKit Error: ${errorCode}`);
       }
 
-      console.log(
-        "MiniKit verification successful, verifying proof with backend...",
-      );
-      // Verify the proof in the backend
-      const verifyResponse = await fetch(`/api/verify`, {
+      // Successfully got proof from MiniKit, now verify with backend
+      console.log("MiniKit verification successful, verifying with backend...");
+
+      // Fixed: Extract only the properties that exist on the success payload
+      // Remove signal - it's not in the response, we'll use the one we sent
+      const { proof, merkle_root, nullifier_hash } = result.finalPayload;
+
+      // Send to our backend verify endpoint
+      const verifyResponse = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          payload: finalPayload as ISuccessResult,
-          action: verifyPayload.action,
-          signal: verifyPayload.signal,
+          proof,
+          merkle_root,
+          nullifier_hash,
+          signal: userIdSignal, // Use the signal we sent to MiniKit
         }),
       });
 
-      const verifyResponseJson = await verifyResponse.json();
+      const verifyResult = await verifyResponse.json();
 
-      if (verifyResponse.ok && verifyResponseJson.success) {
-        // Adjust based on your API response
-        console.log("Backend verification successful!");
-        setIsVerified(true);
-        setVerificationStatus(true); // Persist status (simulated)
-        setVerificationError(null);
-        return verifyResponseJson;
-      } else {
-        console.error("Backend verification failed:", verifyResponseJson);
-        setVerificationError(
-          verifyResponseJson.detail || "Backend verification failed",
-        );
-        setIsVerified(false);
-        setVerificationStatus(false);
-        return null;
+      if (!verifyResponse.ok) {
+        // API returned an error
+        throw new Error(verifyResult.error || "Verification failed on server");
       }
+
+      // Update local state to reflect successful verification
+      setIsVerified(true);
+
+      // After successful verification, no need to check again
+      setIsCheckingStatus(true);
+
+      return verifyResult;
     } catch (error: any) {
       console.error("Error during verification process:", error);
       setVerificationError(
         error.message || "An unknown error occurred during verification.",
       );
-      setIsVerified(false);
-      setVerificationStatus(false);
       return null;
     } finally {
       setIsVerifying(false);
     }
-  }, [session, isVerifying]); // Add MiniKit types if needed
+  }, [session?.user?.sub, isVerifying]);
 
   return {
     isVerified,
     isVerifying,
+    isCheckingStatus,
     verificationError,
     triggerVerification,
     checkVerification,
