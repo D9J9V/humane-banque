@@ -60,7 +60,7 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
   - World ID integration
   - Auction-based rate discovery
   - Liquidation mechanisms
-  - Comprehensive test suite for contract functionality
+  - Comprehensive testing of contract functionality
 
 - **Frontend-Contract Integration:**
   - Contract service layer with ethers.js
