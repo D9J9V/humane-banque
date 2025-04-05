@@ -2,8 +2,19 @@
 
 import { ethers } from "ethers";
 import { MiniKit } from "@worldcoin/minikit-js";
-import AuctionRepoHookABI from "../contracts-unified/artifacts/contracts/AuctionRepoHook.sol/AuctionRepoHook.json";
-import { Config } from "@/lib/config";
+// Minimal ABIs with only the functions we need
+const minimalABI = [
+  // Lend function
+  "function submitLendOffer(uint256 amount, uint16 minRateBPS, uint256 maturityTimestamp, address signal, uint256 root, uint256 nullifierHash, uint256[8] calldata proof) external returns (uint256)",
+  // Borrow function
+  "function submitBorrowRequest(address collateralToken, uint256 collateralAmount, uint256 borrowAmount, uint16 maxRateBPS, uint256 maturityTimestamp, address signal, uint256 root, uint256 nullifierHash, uint256[8] calldata proof) external returns (uint256)"
+];
+
+// Minimal ERC20 ABI with just the approve function
+const minimalERC20ABI = [
+  "function approve(address spender, uint256 amount) public returns (bool)"
+];
+import { Config } from "./config";
 
 // Get contract addresses from config
 const AUCTION_REPO_HOOK_ADDRESS = Config.contracts.auctionRepoHook;
@@ -37,7 +48,7 @@ export const getContract = async () => {
     const signer = await provider.getSigner();
     const contract = new ethers.Contract(
       AUCTION_REPO_HOOK_ADDRESS,
-      AuctionRepoHookABI.abi,
+      minimalABI,
       signer
     );
 
@@ -88,10 +99,12 @@ export const submitLendOffer = async (
     // Get contract instance
     const contract = await getContract();
     
+    // Use the minimal ERC20 ABI defined at the top
+    
     // First, approve USDC transfer
     const usdcContract = new ethers.Contract(
       USDC_ADDRESS,
-      ["function approve(address spender, uint256 amount) public returns (bool)"],
+      minimalERC20ABI,
       await (await getProvider()).getSigner()
     );
     
@@ -330,10 +343,12 @@ export const submitBorrowRequest = async (
     // Get contract instance
     const contract = await getContract();
     
+    // Use the minimal ERC20 ABI defined at the top
+    
     // First, approve collateral token transfer
     const collateralContract = new ethers.Contract(
       collateralToken,
-      ["function approve(address spender, uint256 amount) public returns (bool)"],
+      minimalERC20ABI,
       await (await getProvider()).getSigner()
     );
     
