@@ -1,29 +1,90 @@
 "use client";
 
 import { useState } from "react";
+import { useVerification } from "@/lib/useVerification";
+import { submitLendOffer, daysToMaturityTimestamp, bpsToPercentage } from "@/lib/contracts";
 
 export const LendForm = () => {
   const [amount, setAmount] = useState("");
   const [term, setTerm] = useState("90"); // Default term
+  const [minRateBPS, setMinRateBPS] = useState(200); // Default 2% minimum rate
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [transactionHash, setTransactionHash] = useState<string | null>(null);
+  
+  const { 
+    isVerified, 
+    isVerifying, 
+    verificationError, 
+    triggerVerification 
+  } = useVerification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+    setTransactionError(null);
+    setTransactionHash(null);
 
-    setIsSubmitting(true);
-    console.log(`Submitting Lend: Amount=${amount} USDC, Term=${term} days`);
+    // Ensure the user is verified first
+    if (!isVerified) {
+      try {
+        setIsSubmitting(true);
+        console.log("User not yet verified, triggering verification...");
+        const verificationResult = await triggerVerification();
+        
+        if (!verificationResult) {
+          setTransactionError("World ID verification failed. Please try again.");
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        setTransactionError("Verification failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
-    // --- TODO: Implement actual lending logic ---
-    // 1. API call to backend to prepare/validate lending request.
-    // 2. May involve MiniKit interaction for transaction signing or approval depending on backend implementation.
-    // Simulate API call delay for UI feedback
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    // --- End TODO ---
+    try {
+      setIsSubmitting(true);
+      console.log(`Submitting Lend: Amount=${amount} USDC, Term=${term} days, Min Rate=${bpsToPercentage(minRateBPS)}`);
 
-    alert(`Lend Submitted (Simulated): ${amount} USDC for ${term} days`);
-    setAmount(""); // Reset form after submission
-    setIsSubmitting(false);
+      // Calculate maturity timestamp from term days
+      const maturityTimestamp = daysToMaturityTimestamp(parseInt(term));
+      
+      // Get the latest World ID verification from the previous step
+      // In a real implementation, you'd retrieve this from your backend or state
+      const verificationDataResponse = await fetch("/api/user/verified");
+      const verificationData = await verificationDataResponse.json();
+      
+      if (!verificationData || !verificationData.worldIdProof) {
+        throw new Error("Verification data not available");
+      }
+      
+      // Submit the lending offer
+      const result = await submitLendOffer(
+        amount,
+        minRateBPS,
+        maturityTimestamp,
+        verificationData.worldIdProof
+      );
+
+      if (result.success) {
+        setTransactionHash(result.transactionHash);
+        setAmount(""); // Reset form after submission
+        console.log("Transaction successful:", result);
+      } else {
+        setTransactionError(result.error || "Transaction failed");
+        console.error("Transaction failed:", result.error);
+      }
+    } catch (error) {
+      console.error("Error submitting lend offer:", error);
+      setTransactionError(
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -71,6 +132,40 @@ export const LendForm = () => {
           </select>
         </div>
 
+        <div className="form-control w-full">
+          <label className="label" htmlFor="min-rate">
+            <span className="label-text">Minimum Interest Rate</span>
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              id="min-rate"
+              min="0"
+              max="5000" // 50% in BPS
+              step="25"
+              value={minRateBPS}
+              onChange={(e) => setMinRateBPS(parseInt(e.target.value))}
+              className="range range-primary"
+              disabled={isSubmitting}
+            />
+            <span className="badge badge-primary">{bpsToPercentage(minRateBPS)}</span>
+          </div>
+        </div>
+
+        {transactionError && (
+          <div className="alert alert-error text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{transactionError}</span>
+          </div>
+        )}
+
+        {transactionHash && (
+          <div className="alert alert-success text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>Transaction submitted! Hash: {transactionHash.substring(0, 6)}...{transactionHash.substring(transactionHash.length - 4)}</span>
+          </div>
+        )}
+
         <div className="card-actions justify-end">
           <button
             type="submit"
@@ -80,17 +175,19 @@ export const LendForm = () => {
             {isSubmitting ? (
               <>
                 <span className="loading loading-spinner loading-sm"></span>
-                Submitting...
+                {isVerifying ? "Verifying..." : "Submitting..."}
               </>
             ) : (
-              "Confirm Lend"
+              isVerified ? "Confirm Lend" : "Verify & Lend"
             )}
           </button>
         </div>
-        {/* Placeholder for displaying estimated APY based on the selected term and latest auction data */}
-        {/* <p className="text-xs text-center text-base-content/70 mt-2">
-            Estimated APY based on last auction: X.XX%
-          </p> */}
+        
+        <p className="text-xs text-center text-base-content/70 mt-2">
+          {isVerified 
+            ? `Estimated annual yield: ${bpsToPercentage(minRateBPS)}+` 
+            : "World ID verification required for lending"}
+        </p>
       </form>
     </div>
   );
