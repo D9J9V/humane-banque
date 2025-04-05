@@ -64,10 +64,13 @@ export const useVerification = () => {
         throw new Error("MiniKit not installed");
       }
 
+      // According to World ID docs, passing an empty string for signal is valid
+      // This will generate the proof with the hash of an empty string
+      
       // Execute the verification with MiniKit
       const result = await MiniKit.commandsAsync.verify({
         action: "verify-humane-banque",
-        signal: userIdSignal,
+        signal: "", // Use empty string for signal
         verification_level: VerificationLevel.Orb,
       });
 
@@ -109,13 +112,12 @@ export const useVerification = () => {
         verification_level,
       });
 
-      // Create a payload with proper error checking
+      // Create a minimal payload that exactly matches the World ID API requirements
       const backendPayload = {
-        proof: proof || "",
-        merkle_root: merkle_root || "",
-        nullifier_hash: nullifier_hash || "",
-        verification_level: verification_level || "orb",
-        action: "verify-humane-banque"
+        proof,
+        merkle_root,
+        nullifier_hash,
+        verification_level,
       };
       
       console.log("Sending to backend API:", JSON.stringify(backendPayload));
@@ -139,9 +141,20 @@ export const useVerification = () => {
       return verifyResult;
     } catch (error: any) {
       console.error("Error during verification process:", error);
-      setVerificationError(
-        error.message || "An unknown error occurred during verification.",
-      );
+      
+      // Provide a more user-friendly error message
+      let errorMessage = "Verification failed. Please try again.";
+      
+      if (error.message && error.message.includes("invalid_proof")) {
+        errorMessage = "The World ID verification could not be validated. Please try again.";
+      } else if (error.message && error.message.includes("MiniKit not installed")) {
+        errorMessage = "Please install the World ID app to verify your identity.";
+      } else if (error.message) {
+        // Use the actual error if available
+        errorMessage = error.message;
+      }
+      
+      setVerificationError(errorMessage);
       return null;
     } finally {
       setIsVerifying(false);

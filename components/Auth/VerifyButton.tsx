@@ -54,7 +54,16 @@ export const VerifyButton = ({ onVerified }: VerifyButtonProps) => {
             <span>{verificationError}</span>
           </div>
         )}
-        <p className="text-xs mt-1">Make sure you have World ID app installed and ready.</p>
+        <p className="text-xs mt-1">
+          <a 
+            href="https://worldcoin.org/download" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="link link-primary"
+          >
+            Need World ID app? Download here
+          </a>
+        </p>
       </div>
 
       <button

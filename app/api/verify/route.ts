@@ -53,14 +53,15 @@ export async function POST(request: Request) {
     console.log("Using World ID App ID:", WLD_APP_ID);
     const actionName = "verify-humane-banque";
 
-    // Prepare the World ID payload
+    // Prepare the World ID payload exactly as specified in the API docs
+    // Note: When no signal is provided, World ID API uses the hash of an empty string by default
     const worldIdPayload = {
       nullifier_hash: ensureHexPrefix(verificationPayload.nullifier_hash),
       merkle_root: ensureHexPrefix(verificationPayload.merkle_root),
       proof: ensureHexPrefix(verificationPayload.proof),
       verification_level: verificationPayload.verification_level,
       action: actionName,
-      signal: nextAuthSub, // Use the authenticated user's ID as the signal
+      // Omitting signal_hash to use the default (hash of empty string)
     };
 
     console.log("Sending payload to World ID:", JSON.stringify(worldIdPayload));
