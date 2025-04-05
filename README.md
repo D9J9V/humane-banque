@@ -101,6 +101,30 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
 - **Protection Mechanisms:** Over-collateralization, TWAP oracles, automatic liquidation
 - **No Native Token:** Focuses on core mechanics with established assets (USDC, ETH, WLD)
 
+## Tech Implementation
+
+### Uniswap V4
+
+Humane Banque leverages Uniswap V4's hook system to implement its lending functionality:
+
+- **AuctionRepoHook Contract**: [contracts-unified/contracts/AuctionRepoHook.sol](https://github.com/D9J9V/humane-banque/blob/main/contracts-unified/contracts/AuctionRepoHook.sol) - Core contract implementing the lending market using Uniswap V4 hooks
+- **BaseHook Contract**: [contracts-unified/contracts/BaseHook.sol](https://github.com/D9J9V/humane-banque/blob/main/contracts-unified/contracts/BaseHook.sol) - Base implementation for Uniswap V4 hook integration
+- **Deployment Scripts**: [contracts-unified/script/](https://github.com/D9J9V/humane-banque/blob/main/contracts-unified/script/) - Scripts for deploying hooks to Uniswap V4
+- **Frontend Integration**: [lib/contracts.ts](https://github.com/D9J9V/humane-banque/blob/main/lib/contracts.ts) - JavaScript interface to interact with the Uniswap-based contracts
+
+The AuctionRepoHook uses Uniswap V4's hook system to manage fixed-term loans with auction-based rate discovery, integrating with Uniswap's pools for liquidations and pricing.
+
+### World ID
+
+Humane Banque uses World ID for sybil-resistance and human verification:
+
+- **Verification Hook**: [lib/useVerification.ts](https://github.com/D9J9V/humane-banque/blob/main/lib/useVerification.ts) - Custom React hook for World ID verification flow
+- **VerifyButton Component**: [components/Auth/VerifyButton.tsx](https://github.com/D9J9V/humane-banque/blob/main/components/Auth/VerifyButton.tsx) - UI component for World ID verification
+- **Smart Contract Integration**: [contracts-unified/contracts/AuctionRepoHook.sol](https://github.com/D9J9V/humane-banque/blob/main/contracts-unified/contracts/AuctionRepoHook.sol) (line 260-281) - Verification logic in the smart contract
+- **Backend Verification**: [app/api/verify/route.ts](https://github.com/D9J9V/humane-banque/blob/main/app/api/verify/route.ts) - Server-side verification endpoint
+
+World ID verification ensures each user is a unique human, preventing sybil attacks on the rate discovery mechanism.
+
 ## Development Guidelines
 
 ### Commands
