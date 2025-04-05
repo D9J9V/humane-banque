@@ -93,6 +93,16 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
    - Historical rate analysis
    - User profile and transaction history
 
+### Deployment Notice
+
+The current version of Humane Banque is configured for demonstration purposes with the following considerations:
+
+- Initial deployment does not require pool liquidity to demonstrate the core lending/borrowing functionality
+- Liquidations are currently disabled (`NEXT_PUBLIC_ENABLE_LIQUIDATIONS="false"`) in the default configuration
+- Later this month, we will introduce liquidity and enable liquidations once optimal parameters are determined
+- The `.env.example` file contains all necessary configuration variables for both current demo setup and future enhancements
+- For production deployment, additional security measures and parameter optimization will be implemented
+
 ## Design Philosophy
 
 - **Fixed Terms:** Deliberately chosen to address duration mismatch risk
