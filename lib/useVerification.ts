@@ -87,6 +87,7 @@ export const useVerification = () => {
         throw new Error("Verification level missing from MiniKit response.");
       }
 
+      console.log(userIdSignal);
       // Send to our backend verify endpoint
       const verifyResponse = await fetch("/api/verify", {
         method: "POST",
