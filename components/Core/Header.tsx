@@ -9,13 +9,13 @@ export const Header = () => {
   const { data: session } = useSession();
   
   return (
-    <div className="navbar bg-base-100 border-b border-base-300">
+    <div className="navbar bg-base-100 border-b border-base-300 px-4 h-16 shadow-sm">
       <div className="flex-1">
-        <Link href="/dashboard" legacyBehavior>
-          <a className="btn btn-ghost text-xl normal-case">Humane Banque</a>
+        <Link href="/dashboard" className="btn btn-ghost text-xl normal-case font-bold">
+          Humane Banque
         </Link>
       </div>
-      <div className="flex-none gap-2">
+      <div className="flex-none gap-3">
         {session && <WalletStatus />}
         <SignInButton />
       </div>

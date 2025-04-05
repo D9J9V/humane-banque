@@ -6,26 +6,33 @@ export const SignInButton = () => {
   if (session) {
     return (
       <div className="flex items-center gap-2">
-        {/* ... existing dropdown ... */}
         <div className="dropdown dropdown-end">
-          <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-            {/* ... avatar content ... */}
+          <label tabIndex={0} className="btn btn-ghost btn-circle avatar bg-primary/10">
+            <div className="rounded-full">
+              <div className="flex h-full w-full items-center justify-center text-primary font-bold">
+                {session.user?.name?.charAt(0) || "?"}
+              </div>
+            </div>
           </label>
           <ul
             tabIndex={0}
-            className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+            className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2"
           >
-            <li>
-              <span className="justify-between">
-                {/* Use session.user.sub from the JWT/Session callback */}
+            <li className="menu-title font-medium">
+              <span>
                 {session.user?.name ?? "Profile"}
-                <span className="badge badge-ghost badge-sm">
-                  {session.user?.sub?.slice(0, 6) ?? "???"}...
-                </span>
+              </span>
+              <span className="badge badge-sm badge-outline badge-primary">
+                {session.user?.sub?.slice(0, 6) ?? "???"}...
               </span>
             </li>
-            <li>
-              <a onClick={() => signOut()}>Logout</a>
+            <li className="mt-2">
+              <a 
+                onClick={() => signOut()}
+                className="text-error hover:bg-error/10"
+              >
+                Logout
+              </a>
             </li>
           </ul>
         </div>
@@ -34,11 +41,10 @@ export const SignInButton = () => {
   } else {
     return (
       <button
-        // Ensure this 'worldcoin' matches the provider ID in authOptions
         onClick={() => signIn("worldcoin")}
-        className="btn btn-primary btn-sm"
+        className="btn btn-primary btn-sm rounded-full px-4 shadow-sm"
       >
-        Sign In
+        Verify with World ID
       </button>
     );
   }

@@ -8,12 +8,16 @@ interface AppLayoutProps {
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
-    // min-h-screen ensures the TabBar stays at the bottom even on short pages
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-dvh bg-base-100">
       <Header />
-      {/* pb-20 accounts for TabBar height (approx h-16 or 4rem) to prevent content overlap */}
-      <main className="flex-grow p-4 pb-20 bg-base-200/50">{children}</main>
-      <TabBar />
+      <main className="flex-grow px-4 py-6 bg-gradient-to-b from-base-100 to-base-200/50">
+        <div className="container mx-auto max-w-4xl">
+          <TabBar />
+          <div className="p-4 rounded-xl bg-base-100 shadow-sm">
+            {children}
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

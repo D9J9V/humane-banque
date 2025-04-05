@@ -27,29 +27,19 @@ export const TabBar = () => {
   const pathname = usePathname();
 
   return (
-    // Use the 'tabs' component class, adding a style like 'tabs-boxed' or 'tabs-bordered'
-    // Add role="tablist" for accessibility
-    // You might want to remove border-t/border-base-300 if tabs-boxed/tabs-bordered provides enough separation
-    <div role="tablist" className="tabs tabs-boxed">
+    <div role="tablist" className="tabs tabs-boxed bg-base-200 p-1 rounded-xl mx-auto max-w-md mb-4">
       {tabs.map((tab) => (
         <Link
           key={tab.name}
           href={tab.href}
-          role="tab" // Accessibility: Add role="tab" to each tab link
-          // Base class 'tab' is required for each item
-          // Conditional 'tab-active' for the active tab
-          // Conditional 'text-primary' can style the active tab text/icon further if needed
-          // Added flex/gap for icon + text layout within the tab
-          className={`tab flex items-center gap-1 sm:gap-2 ${
-            // Added flex layout
+          role="tab"
+          className={`tab flex-1 flex items-center justify-center gap-2 transition-all duration-200 ${
             pathname === tab.href
-              ? "tab-active text-primary font-semibold" // DaisyUI active class + custom styling
-              : ""
+              ? "tab-active bg-primary text-primary-content font-medium" 
+              : "hover:bg-base-300"
           }`}
         >
-          <tab.icon className="h-4 w-4 sm:h-5 sm:w-5" />{" "}
-          {/* Optional: Adjust icon size */}
-          {/* Removed 'btm-nav-label' class, not needed for 'tabs' */}
+          <tab.icon className="h-5 w-5" />
           <span>{tab.name}</span>
         </Link>
       ))}

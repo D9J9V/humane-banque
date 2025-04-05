@@ -138,17 +138,17 @@ export const WalletStatus = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="badge badge-secondary">{Config.network.name}</div>
+      <div className="badge badge-secondary font-medium">{Config.network.name}</div>
       <a
         href={getExplorerUrl("address", address || "")}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 rounded-full bg-base-300 px-3 py-1 text-sm hover:bg-base-200"
+        className="flex items-center gap-2 rounded-full bg-base-200 px-4 py-1.5 text-sm hover:bg-base-300 transition-colors shadow-sm"
       >
-        <div className="w-2 h-2 rounded-full bg-success"></div>
-        <span>
+        <div className="w-2.5 h-2.5 rounded-full bg-success animate-pulse"></div>
+        <span className="font-medium">
           {address ? formatAddress(address) : "Unknown"}
-          {balance && ` (${balance} ETH)`}
+          {balance && <span className="ml-1 opacity-80">({balance} ETH)</span>}
         </span>
       </a>
     </div>
