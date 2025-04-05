@@ -1,7 +1,7 @@
 # Humane Banque
 **Secure Fixed-Term DeFi Lending for Verified Humans**
 
-**Date:** April 5, 2025
+**Date:** April 7, 2025
 
 ## Project Structure
 
@@ -53,13 +53,14 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
 - **Frontend Foundation:**
   - Multi-screen architecture using Next.js App Router
   - Core navigation components
-  - Initial screens (Landing, Dashboard, Lending)
+  - Initial screens (Landing, Dashboard, Lending, Borrowing, Portfolio)
   
 - **Smart Contracts:**
   - Core `AuctionRepoHook` implementation
   - World ID integration
   - Auction-based rate discovery
   - Liquidation mechanisms
+  - Comprehensive test suite for contract functionality
 
 - **Frontend-Contract Integration:**
   - Contract service layer with ethers.js
@@ -67,24 +68,30 @@ For detailed technical specifications, see the contracts in the `contracts-unifi
   - Wallet connection status component
   - Environment-based configuration management
   - Real-time market data display
-  - Lending form with contract interaction
+  - Lending and Borrowing forms with contract interaction
+
+- **User Flows:**
+  - Complete Borrow screen and logic with collateral management
+  - Portfolio management with position tracking
+  - Loan claiming and repayment interfaces
+  - Feature flagging for phased release
 
 ### Next Steps
 
-1. **Complete User Flows:**
-   - Finish Borrow screen and logic
-   - Add portfolio management features
-   - Implement loan claiming and repayment UI
-   
-2. **Testing & Security:**
+1. **Security & Additional Testing:**
    - Comprehensive contract audits
    - Frontend testing and error handling
    - Error boundaries and fallback UI
    
-3. **Performance & UX Improvements:**
+2. **Performance & UX Improvements:**
    - Add transaction status monitoring
    - Implement loading state optimizations
    - Add advanced analytics dashboard
+   
+3. **Advanced Features:**
+   - Liquidation monitoring and notifications
+   - Historical rate analysis
+   - User profile and transaction history
 
 ## Design Philosophy
 

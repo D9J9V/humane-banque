@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.20;
 
-import {PoolKey} from "../libraries/PoolKey.sol";
+import {PoolKey} from "../../libraries/uniswap/PoolKey.sol";
 import {IPoolManager} from "./IPoolManager.sol";
-import {BalanceDelta} from "../types/BalanceDelta.sol";
+import {BalanceDelta} from "../../types/uniswap/BalanceDelta.sol";
 
 /// @notice Interface for Uniswap v4 Hook contracts
 interface IHooks {
