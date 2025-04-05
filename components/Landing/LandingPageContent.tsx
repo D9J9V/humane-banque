@@ -17,39 +17,35 @@ export const InfoTooltip = ({
 
 export const LandingPageContent = () => {
   return (
-    <div className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center text-center">
-      <div className="hero min-h-[60vh] bg-base-200 rounded-box mb-10">
-        <div className="hero-content text-center">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold">Humane Banque</h1>
-            <p className="py-6">
-              Secure, predictable{" "}
-              <InfoTooltip
-                term="Fixed-Term"
-                explanation="Loans and deposits have clear start and end dates, unlike open-ended terms common in DeFi."
-              />{" "}
-              DeFi Lending exclusively for{" "}
-              <InfoTooltip
-                term="Verified Humans"
-                explanation="Uses World ID's Proof-of-Humanity to ensure every participant is a unique real person, preventing bots."
-              />
-              .
-            </p>
-            <Link href="/dashboard" legacyBehavior>
-              <a className="btn btn-primary">Enter App</a>
-            </Link>
+    <div className="w-full flex flex-col items-center justify-start overflow-y-auto pb-4">
+      <div className="stats bg-primary text-primary-content shadow w-full mb-6">
+        <div className="stat">
+          <div className="stat-title opacity-80">Platform</div>
+          <div className="stat-value text-xl md:text-2xl">Verified Human Banking</div>
+          <div className="stat-desc opacity-90 mt-2">
+            Secure, predictable{" "}
+            <InfoTooltip
+              term="Fixed-Term"
+              explanation="Loans and deposits have clear start and end dates, unlike open-ended terms common in DeFi."
+            />{" "}
+            DeFi lending with{" "}
+            <InfoTooltip
+              term="World ID"
+              explanation="Uses World ID's Proof-of-Humanity to ensure every participant is a unique real person, preventing bots."
+            />
+            .
           </div>
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold mb-6">Why Humane Banque?</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 w-full max-w-4xl">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body items-center text-center">
-            <h3 className="card-title">Predictability</h3>
+      <div className="divider divider-primary">Key Features</div>
+      
+      <div className="flex overflow-x-auto gap-4 w-full mb-6 pb-2 snap-x">
+        <div className="card bg-secondary text-secondary-content shadow-lg flex-shrink-0 w-[85%] max-w-xs snap-center">
+          <div className="card-body">
+            <div className="badge badge-outline mb-2">Predictability</div>
             <p>
-              Fixed terms and fixed rates mean you know your APY as a lender and
-              your APR as a borrower upfront. No surprises from{" "}
+              Fixed terms and rates mean you know your returns or costs upfront. No surprises from{" "}
               <InfoTooltip
                 term="Floating Rates"
                 explanation="Interest rates that can change over the life of the loan, common in other DeFi protocols."
@@ -58,32 +54,33 @@ export const LandingPageContent = () => {
             </p>
           </div>
         </div>
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body items-center text-center">
-            <h3 className="card-title">Fair & Transparent Rates</h3>
+        
+        <div className="card bg-accent text-accent-content shadow-lg flex-shrink-0 w-[85%] max-w-xs snap-center">
+          <div className="card-body">
+            <div className="badge badge-outline mb-2">Fair Pricing</div>
             <p>
-              Interest rates are set by real supply and demand through periodic{" "}
+              Rates set by real supply and demand through{" "}
               <InfoTooltip
                 term="Auctions"
                 explanation="A mechanism where lenders and borrowers submit bids/offers, and the protocol determines a clearing interest rate."
               />{" "}
-              among verified humans, not artificial subsidies.
+              among verified humans.
             </p>
           </div>
         </div>
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body items-center text-center">
-            <h3 className="card-title">Enhanced Security</h3>
+        
+        <div className="card bg-info text-info-content shadow-lg flex-shrink-0 w-[85%] max-w-xs snap-center">
+          <div className="card-body">
+            <div className="badge badge-outline mb-2">Enhanced Security</div>
             <p>
-              Mandatory{" "}
               <InfoTooltip
                 term="Proof-of-Humanity"
                 explanation="Cryptographic proof provided by World ID confirming you are a unique human without revealing your identity."
               />{" "}
-              prevents Sybil attacks, while{" "}
+              prevents attacks, while{" "}
               <InfoTooltip
                 term="Over-collateralization"
-                explanation="Borrowers must deposit collateral (like ETH or WLD) worth more than the loan amount, protecting lenders."
+                explanation="Borrowers must deposit collateral worth more than the loan amount, protecting lenders."
               />{" "}
               secures loans.
             </p>
@@ -91,45 +88,87 @@ export const LandingPageContent = () => {
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold mb-6">How It Works (Simplified)</h2>
-      <div className="w-full max-w-2xl mb-10">
-        <ul className="steps steps-vertical lg:steps-horizontal w-full">
-          <li className="step step-primary">Verify with World ID</li>
-          <li className="step step-primary">
-            Commit to{" "}
-            <InfoTooltip
-              term="Lend (Deposit USDC)"
-              explanation="Provide USDC stablecoins to the protocol to earn fixed interest."
-            />{" "}
-            or{" "}
-            <InfoTooltip
-              term="Borrow (Provide Collateral)"
-              explanation="Take out a USDC loan by locking up assets like ETH or WLD as security."
-            />{" "}
-            for a{" "}
-            <InfoTooltip
-              term="chosen term"
-              explanation="Select a predefined loan duration (e.g., 30, 90 days) with a fixed interest rate."
-            />
+      <div className="divider divider-primary">Process Flow</div>
+      
+      <div className="w-full mb-6">
+        <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
+          <li>
+            <div className="timeline-middle">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-primary"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+            </div>
+            <div className="timeline-start md:text-end mb-10">
+              <div className="text-lg font-bold">Verify Identity</div>
+              <div className="text-sm">Complete World ID verification to prove you&apos;re a unique human</div>
+            </div>
+            <hr className="bg-primary"/>
           </li>
-          <li className="step step-primary">Rates set via Auction</li>
-          <li className="step">Loan Active</li>
-          <li className="step">Repay or Receive Funds at Maturity</li>
+          <li>
+            <hr className="bg-primary"/>
+            <div className="timeline-middle">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-primary"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+            </div>
+            <div className="timeline-end mb-10">
+              <div className="text-lg font-bold">Choose Position</div>
+              <div className="text-sm">
+                <InfoTooltip
+                  term="Lend"
+                  explanation="Provide USDC stablecoins to the protocol to earn fixed interest."
+                />{" "}
+                or{" "}
+                <InfoTooltip
+                  term="Borrow"
+                  explanation="Take out a USDC loan by locking up assets like ETH or WLD as security."
+                />{" "}
+                for a fixed term
+              </div>
+            </div>
+            <hr className="bg-primary"/>
+          </li>
+          <li>
+            <hr className="bg-primary"/>
+            <div className="timeline-middle">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-primary"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+            </div>
+            <div className="timeline-start md:text-end mb-10">
+              <div className="text-lg font-bold">Auction Phase</div>
+              <div className="text-sm">Rates are determined fairly through market-based auction mechanism</div>
+            </div>
+            <hr/>
+          </li>
+          <li>
+            <hr/>
+            <div className="timeline-middle">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+            </div>
+            <div className="timeline-end mb-10">
+              <div className="text-lg font-bold">Active Period</div>
+              <div className="text-sm">Your loan or deposit is active with the fixed rate</div>
+            </div>
+            <hr/>
+          </li>
+          <li>
+            <hr/>
+            <div className="timeline-middle">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+            </div>
+            <div className="timeline-start md:text-end">
+              <div className="text-lg font-bold">Maturity</div>
+              <div className="text-sm">Borrowers repay, lenders receive principal plus interest</div>
+            </div>
+          </li>
         </ul>
       </div>
 
-      <h2 className="text-3xl font-bold mb-6 mt-10">
-        Frequently Asked Questions
-      </h2>
-      <div className="w-full max-w-4xl mb-10 space-y-2">
+      <div className="divider divider-primary">FAQ</div>
+      <div className="w-full mb-6 space-y-3">
         {/* FAQ items using DaisyUI collapse for better organization */}
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" defaultChecked />
-          <div className="collapse-title font-medium">
-            Why use fixed terms (e.g., 30, 90 days) instead of indefinite
-            lending?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">01</span>
+            Why use fixed terms instead of indefinite lending?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               We deliberately chose fixed terms to address the significant{" "}
               <InfoTooltip
@@ -156,12 +195,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
-            How are interest rates determined? Why aren&apos;t they super high?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">02</span>
+            How are interest rates determined?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               Rates are set entirely by{" "}
               <strong>market supply and demand</strong> through periodic{" "}
@@ -180,12 +220,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">03</span>
             Why is World ID verification mandatory?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               This is core to our &quot;Humane&quot; philosophy. It ensures{" "}
               <strong>every participant is a unique, verified human</strong>,
@@ -208,12 +249,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
-            How are lenders&apos; funds protected (besides World ID)?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">04</span>
+            How are lenders&apos; funds protected?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>We use several standard and unique mechanisms:</p>
             <ul className="list-disc list-inside ml-4">
               <li>
@@ -241,13 +283,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
-            What happens if a borrower defaults? What is &quot;defaulter
-            blacklisting&quot;?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">05</span>
+            What happens if a borrower defaults?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               If a borrower doesn&apos;t repay, their collateral is liquidated
               to repay the lender.
@@ -273,12 +315,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">06</span>
             Why build this using Uniswap V4 Hooks?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               Uniswap V4 Hooks allow embedding custom logic directly into
               Uniswap pools, providing:
@@ -300,12 +343,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
-            Does Humane Banque have its own token?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">07</span>
+            Is there a platform token?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               <strong>No.</strong> We deliberately avoided introducing a new
               token. The protocol&apos;s value relies on its core mechanics
@@ -316,12 +360,13 @@ export const LandingPageContent = () => {
           </div>
         </div>
 
-        <div className="collapse collapse-plus bg-base-100 shadow-md rounded-box">
+        <div className="collapse collapse-arrow bg-base-200 shadow-md rounded-box">
           <input type="radio" name="landing-faq" />
-          <div className="collapse-title font-medium">
-            Are the complex mechanics difficult for end-users?
+          <div className="collapse-title font-medium text-sm md:text-base flex items-center">
+            <span className="badge badge-primary mr-2">08</span>
+            Is it complex to use?
           </div>
-          <div className="collapse-content text-left space-y-2">
+          <div className="collapse-content text-left space-y-2 bg-base-100 rounded-b-box">
             <p>
               While the underlying protocol (<code>AuctionRepoHook</code>) is
               sophisticated, the{" "}
@@ -337,18 +382,22 @@ export const LandingPageContent = () => {
         </div>
       </div>
 
-      <div className="text-sm text-base-content/70 mt-4">
-        Built on{" "}
-        <InfoTooltip
-          term="Uniswap V4 Hooks"
-          explanation="Custom logic integrated directly into Uniswap V4 pools, enabling novel financial applications like this lending protocol."
-        />{" "}
-        and{" "}
-        <InfoTooltip
-          term="World ID"
-          explanation="A privacy-preserving identity protocol that lets you prove you're a unique human online."
-        />
-        .
+      <div className="alert bg-neutral text-neutral-content rounded-box mt-2 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div>
+          <div className="text-sm font-medium">Powered by</div>
+          <div className="text-xs flex gap-2 items-center">
+            <InfoTooltip
+              term="Uniswap V4 Hooks"
+              explanation="Custom logic integrated directly into Uniswap V4 pools, enabling novel financial applications like this lending protocol."
+            />
+            +
+            <InfoTooltip
+              term="World ID"
+              explanation="A privacy-preserving identity protocol that lets you prove you're a unique human online."
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

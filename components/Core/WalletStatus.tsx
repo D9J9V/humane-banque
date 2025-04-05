@@ -121,19 +121,7 @@ export const WalletStatus = () => {
   }
 
   if (!isConnected) {
-    return (
-      <button
-        onClick={connectWallet}
-        className="btn btn-sm btn-primary rounded-full"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <span className="loading loading-spinner loading-xs"></span>
-        ) : (
-          <>Connect Wallet</>
-        )}
-      </button>
-    );
+    return null; // Don't display anything when not connected
   }
 
   return (

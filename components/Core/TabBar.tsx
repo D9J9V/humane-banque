@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, CurrencyDollarIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Config } from "@/lib/config";
 
 // Define base tabs that are always available
@@ -15,32 +15,31 @@ const baseTabs = [
 const borrowingEnabled = Config.features.borrowingEnabled;
 const borrowTab = { name: "Borrow", href: "/borrow", icon: ArrowDownTrayIcon };
 const portfolioTab = { name: "Portfolio", href: "/portfolio", icon: CurrencyDollarIcon };
+const infoTab = { name: "Info", href: "/info", icon: InformationCircleIcon };
 
 // Build the tabs array based on feature flags
 const tabs = [
   ...baseTabs,
   ...(borrowingEnabled ? [borrowTab] : []),
   portfolioTab,
+  infoTab,
 ];
 
 export const TabBar = () => {
   const pathname = usePathname();
 
   return (
-    <div role="tablist" className="tabs tabs-boxed bg-base-200 p-1 rounded-xl mx-auto max-w-md mb-4">
+    <div className="grid grid-cols-4 h-full w-full">
       {tabs.map((tab) => (
         <Link
           key={tab.name}
           href={tab.href}
-          role="tab"
-          className={`tab flex-1 flex items-center justify-center gap-2 transition-all duration-200 ${
-            pathname === tab.href
-              ? "tab-active bg-primary text-primary-content font-medium" 
-              : "hover:bg-base-300"
+          className={`flex flex-col items-center justify-center ${
+            pathname === tab.href ? 'text-primary font-medium' : 'text-base-content/70'
           }`}
         >
-          <tab.icon className="h-5 w-5" />
-          <span>{tab.name}</span>
+          <tab.icon className="h-5 w-5 mb-1" />
+          <span className="text-xs">{tab.name}</span>
         </Link>
       ))}
     </div>
