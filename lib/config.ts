@@ -41,7 +41,7 @@ export const Config = {
   
   // Feature flags
   features: {
-    borrowingEnabled: process.env.NEXT_PUBLIC_ENABLE_BORROWING === "true",
+    borrowingEnabled: process.env.NEXT_PUBLIC_ENABLE_BORROWING === "true" || true, // Enable borrowing by default for demo
     liquidationsEnabled: process.env.NEXT_PUBLIC_ENABLE_LIQUIDATIONS === "true",
     mockDataOnly: process.env.NEXT_PUBLIC_MOCK_DATA_ONLY === "true" || true, // Default to mock data until production
   }

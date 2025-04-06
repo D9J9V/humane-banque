@@ -68,15 +68,26 @@ export const getProvider = async () => {
       throw new Error("MiniKit is not installed");
     }
 
-    // In the real implementation, MiniKit will provide ethereum access
-    // This fallback is for development/testing only
+    // Try to get provider directly from MiniKit
+    try {
+      // MiniKit should provide this method in World App environment
+      const ethereum = await MiniKit.getProvider();
+      if (ethereum) {
+        const provider = new ethers.BrowserProvider(ethereum);
+        return provider;
+      }
+    } catch (miniKitError) {
+      console.warn("Could not get provider from MiniKit:", miniKitError);
+      // Fall through to fallback options
+    }
+
+    // Fallback: try window.ethereum (for development/testing)
     if (typeof window !== 'undefined' && 'ethereum' in window) {
-      // Create provider from window.ethereum
       const provider = new ethers.BrowserProvider(window.ethereum as any);
       return provider;
-    } else {
-      throw new Error("Ethereum provider not found");
     }
+    
+    throw new Error("Ethereum provider not found");
   } catch (error) {
     console.error("Error getting provider:", error);
     throw error;
