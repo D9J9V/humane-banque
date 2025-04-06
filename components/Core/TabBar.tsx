@@ -28,8 +28,11 @@ const tabs = [
 export const TabBar = () => {
   const pathname = usePathname();
 
+  // Use a fixed grid-cols-5 since we have 5 tabs (or adjust if borrowingEnabled is false)
+  const gridClass = borrowingEnabled ? 'grid-cols-5' : 'grid-cols-4';
+
   return (
-    <div className="grid grid-cols-4 h-full w-full">
+    <div className={`grid ${gridClass} h-full w-full`}>
       {tabs.map((tab) => (
         <Link
           key={tab.name}

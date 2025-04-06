@@ -17,10 +17,10 @@ export async function GET() {
       return NextResponse.json({ isVerified: false }, { status: 401 });
     }
 
-    // Look up the user's profile in Supabase
+    // Look up the user's profile in Supabase including World ID proof data
     const { data: profile, error } = await supabaseAdmin
       .from("profiles")
-      .select("is_verified")
+      .select("is_verified, world_id_nullifier_hash, world_id_proof, world_id_merkle_root, verification_payload")
       .eq("next_auth_sub", session.user.sub)
       .maybeSingle();
 
@@ -32,9 +32,26 @@ export async function GET() {
       );
     }
 
-    // Return the verification status
+    // Return the verification status and World ID proof data for contract interactions
+    let worldIdProof = null;
+    
+    if (profile?.is_verified) {
+      // Use the stored verification_payload object if available
+      if (profile.verification_payload) {
+        worldIdProof = profile.verification_payload;
+      } else {
+        // Fall back to constructing from individual fields
+        worldIdProof = {
+          proof: profile.world_id_proof,
+          merkle_root: profile.world_id_merkle_root,
+          nullifier_hash: profile.world_id_nullifier_hash
+        };
+      }
+    }
+
     return NextResponse.json({
       isVerified: profile?.is_verified || false,
+      worldIdProof
     });
   } catch (error: any) {
     console.error("Unexpected error checking verification status:", error);

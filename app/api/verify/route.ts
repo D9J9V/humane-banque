@@ -212,11 +212,20 @@ export async function POST(request: Request) {
         );
       }
 
+      // Store the complete World ID proof data, ensuring we store data exactly as needed for contracts
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
           is_verified: true,
           world_id_nullifier_hash: verifiedNullifierHash,
+          world_id_proof: verificationPayload.proof, // Raw proof string
+          world_id_merkle_root: verificationPayload.merkle_root,
+          verification_payload: {
+            proof: verificationPayload.proof,
+            merkle_root: verificationPayload.merkle_root,
+            nullifier_hash: verifiedNullifierHash
+          }, // Store complete object as JSON for easier retrieval
+          last_verification_time: new Date().toISOString(),
         })
         .eq("id", profile.id);
 
