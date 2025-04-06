@@ -15,9 +15,9 @@ export default function MiniKitProvider({ children }: { children: ReactNode }) {
         // Ensure provider is ready (this is important for World App environment)
         if (MiniKit.isInstalled()) {
           try {
-            // Force initialization of the provider
-            await MiniKit.getProvider();
-            console.log("MiniKit provider initialized successfully");
+            // MiniKit doesn't have a direct getProvider method
+            // Just ensure it's installed properly
+            console.log("MiniKit installed successfully:", MiniKit.isInstalled());
           } catch (err) {
             console.warn("MiniKit provider initialization warning:", err);
           }

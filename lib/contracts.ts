@@ -68,17 +68,17 @@ export const getProvider = async () => {
       throw new Error("MiniKit is not installed");
     }
 
-    // Try to get provider directly from MiniKit
+    // In World App environment, MiniKit injects window.ethereum
+    // Just check if MiniKit is installed properly first
     try {
-      // MiniKit should provide this method in World App environment
-      const ethereum = await MiniKit.getProvider();
-      if (ethereum) {
-        const provider = new ethers.BrowserProvider(ethereum);
-        return provider;
+      // Verify MiniKit is properly installed
+      if (!MiniKit.isInstalled()) {
+        console.warn("MiniKit installation check failed");
+      } else {
+        console.log("MiniKit is installed properly");
       }
     } catch (miniKitError) {
-      console.warn("Could not get provider from MiniKit:", miniKitError);
-      // Fall through to fallback options
+      console.warn("MiniKit check error:", miniKitError);
     }
 
     // Fallback: try window.ethereum (for development/testing)
