@@ -17,7 +17,6 @@ export const VerifyButton = ({ onVerified }: VerifyButtonProps) => {
       onVerified?.();
     } else {
       console.error("Verification failed in component");
-      // Error message is displayed via verificationError state within the component UI
     }
   };
 

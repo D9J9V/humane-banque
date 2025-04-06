@@ -18,7 +18,7 @@ export const BorrowForm = () => {
     isVerified, 
     isVerifying, 
     verificationError, 
-    triggerVerification 
+    triggerVerification
   } = useVerification();
 
   const handleSubmit = async (e: React.FormEvent) => {

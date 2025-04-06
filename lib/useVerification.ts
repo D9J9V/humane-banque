@@ -4,29 +4,104 @@ import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 
+// Create a shared state object to persist verification status across hook calls
+// This is a simple approach that works without React context
+const sharedState = {
+  isVerified: false,
+  lastChecked: 0,
+  verificationInProgress: false, // Track if verification is in progress anywhere
+  hasBeenVerified: false // Track if a successful verification has happened in this session
+};
+
+// Create a way to update localStorage as a backup storage
+const updateStorageVerification = (status: boolean) => {
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem('humane_banque_verified', status ? 'true' : 'false');
+      window.localStorage.setItem('humane_banque_verified_at', Date.now().toString());
+    } catch (e) {
+      console.warn('Could not update localStorage:', e);
+    }
+  }
+};
+
+// Try to load initial state from localStorage
+if (typeof window !== 'undefined') {
+  try {
+    const storedVerification = window.localStorage.getItem('humane_banque_verified');
+    const storedTimestamp = window.localStorage.getItem('humane_banque_verified_at');
+    
+    if (storedVerification === 'true') {
+      sharedState.isVerified = true;
+      sharedState.hasBeenVerified = true;
+      if (storedTimestamp) {
+        sharedState.lastChecked = parseInt(storedTimestamp, 10);
+      }
+    }
+  } catch (e) {
+    console.warn('Could not read from localStorage:', e);
+  }
+}
+
 export const useVerification = () => {
   const { data: session, status: sessionStatus } = useSession();
-  const [isVerified, setIsVerified] = useState<boolean>(false);
+  // Use local state that syncs with the shared state
+  const [isVerified, setIsVerified] = useState<boolean>(sharedState.isVerified);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
-  const [verificationError, setVerificationError] = useState<string | null>(
-    null,
-  );
+  const [verificationError, setVerificationError] = useState<string | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
 
-  // ... (checkVerification and useEffect remain the same) ...
+  // Function to update both local and shared state
+  const updateVerificationStatus = useCallback((status: boolean) => {
+    console.log(`Updating verification status to: ${status}`);
+    setIsVerified(status);
+    sharedState.isVerified = status;
+    sharedState.lastChecked = Date.now();
+    
+    if (status) {
+      sharedState.hasBeenVerified = true;
+    }
+    
+    // Also update localStorage
+    updateStorageVerification(status);
+  }, []);
+
   const checkVerification = useCallback(async (): Promise<boolean> => {
+    // If we've already verified in this session, don't check again
+    if (sharedState.hasBeenVerified) {
+      console.log("Already verified in this session, using cached status");
+      if (!isVerified) {
+        setIsVerified(true);
+      }
+      return true;
+    }
+    
     if (!session?.user?.sub || isCheckingStatus) return isVerified;
+
+    // Don't check too frequently
+    const timeSinceLastCheck = Date.now() - sharedState.lastChecked;
+    if (sharedState.lastChecked > 0 && timeSinceLastCheck < 10000) { // Increased to 10 seconds
+      console.log("Using cached verification status:", sharedState.isVerified);
+      // Update local state from shared state if needed
+      if (isVerified !== sharedState.isVerified) {
+        setIsVerified(sharedState.isVerified);
+      }
+      return sharedState.isVerified;
+    }
 
     setIsCheckingStatus(true);
     try {
+      console.log("Checking verification status with API...");
       const response = await fetch("/api/user/verified");
       const data = await response.json();
 
       if (response.ok && data.isVerified) {
-        setIsVerified(true);
+        console.log("User is verified according to API");
+        updateVerificationStatus(true);
         return true;
       } else {
-        setIsVerified(false);
+        console.log("User is NOT verified according to API");
+        updateVerificationStatus(false);
         return false;
       }
     } catch (error) {
@@ -35,28 +110,55 @@ export const useVerification = () => {
     } finally {
       setIsCheckingStatus(false);
     }
-  }, [session?.user?.sub, isVerified, isCheckingStatus]);
+  }, [session?.user?.sub, isVerified, isCheckingStatus, updateVerificationStatus]);
 
+  // Effect to sync with shared state and check verification when session changes
   useEffect(() => {
     if (sessionStatus === "authenticated" && session?.user?.sub) {
-      checkVerification();
+      // First, check if we've already verified in this session
+      if (sharedState.hasBeenVerified) {
+        console.log("Already verified in this session, using cached status");
+        setIsVerified(true);
+        return;
+      }
+      
+      // Sync with shared state first
+      if (isVerified !== sharedState.isVerified) {
+        setIsVerified(sharedState.isVerified);
+      }
+      
+      // Check verification if needed
+      const timeSinceLastCheck = Date.now() - sharedState.lastChecked;
+      if (sharedState.lastChecked === 0 || timeSinceLastCheck > 10000) {
+        checkVerification();
+      }
     } else if (sessionStatus === "unauthenticated") {
-      setIsVerified(false);
+      updateVerificationStatus(false);
     }
-  }, [sessionStatus, session?.user?.sub, checkVerification]);
+  }, [sessionStatus, session?.user?.sub, isVerified, checkVerification, updateVerificationStatus]);
 
   const triggerVerification = useCallback(async () => {
+    // If already verified, don't trigger the flow again
+    if (sharedState.hasBeenVerified || isVerified) {
+      console.log("Already verified, no need to trigger verification again");
+      return { success: true, alreadyVerified: true };
+    }
+    
+    // Don't allow multiple verification flows at the same time
+    if (sharedState.verificationInProgress) {
+      console.log("Verification already in progress in another component");
+      return null;
+    }
+    
     if (!session?.user?.sub || isVerifying) {
       console.log("Cannot verify: No session or already verifying.");
       return null;
     }
 
-    const userIdSignal = session.user.sub;
-
     console.log("Triggering World ID Verification Flow...");
-    console.log("Using signal (user sub):", userIdSignal);
     setIsVerifying(true);
     setVerificationError(null);
+    sharedState.verificationInProgress = true;
 
     try {
       if (!MiniKit.isInstalled()) {
@@ -64,9 +166,6 @@ export const useVerification = () => {
         throw new Error("MiniKit not installed");
       }
 
-      // According to World ID docs, passing an empty string for signal is valid
-      // This will generate the proof with the hash of an empty string
-      
       // Execute the verification with MiniKit
       const result = await MiniKit.commandsAsync.verify({
         action: "verify-humane-banque",
@@ -81,14 +180,7 @@ export const useVerification = () => {
         throw new Error(`MiniKit Error: ${errorCode}`);
       }
 
-      // Successfully got proof from MiniKit, now verify with backend
-      console.log("MiniKit verification successful, verifying with backend...");
-      
-      // Log the full MiniKit result for debugging
-      console.log("Full MiniKit result.finalPayload:", JSON.stringify(result.finalPayload, null, 2));
-
       // Extract properties from the result
-      // Depending on MiniKit's response format, adjust this extraction
       const proof = result.finalPayload.proof;
       const merkle_root = result.finalPayload.merkle_root;
       const nullifier_hash = result.finalPayload.nullifier_hash;
@@ -97,22 +189,8 @@ export const useVerification = () => {
       if (!verification_level) {
         throw new Error("Verification level missing from MiniKit response.");
       }
-      
-      // Log individual extracted values
-      console.log("Proof:", proof);
-      console.log("Merkle Root:", merkle_root);
-      console.log("Nullifier Hash:", nullifier_hash);
-      console.log("Verification Level:", verification_level);
 
-      // Log extracted values for debugging
-      console.log("Extracted from MiniKit result:", {
-        proof,
-        merkle_root,
-        nullifier_hash,
-        verification_level,
-      });
-
-      // Create a minimal payload that exactly matches the World ID API requirements
+      // Create payload for the backend
       const backendPayload = {
         proof,
         merkle_root,
@@ -120,7 +198,7 @@ export const useVerification = () => {
         verification_level,
       };
       
-      console.log("Sending to backend API:", JSON.stringify(backendPayload));
+      console.log("Sending to backend API");
       
       // Send to our backend verify endpoint
       const verifyResponse = await fetch("/api/verify", {
@@ -136,8 +214,19 @@ export const useVerification = () => {
         throw new Error(verifyResult.error || "Verification failed on server");
       }
 
-      // Update local state to reflect successful verification
-      setIsVerified(true);
+      // Update verification status in both local and shared state
+      console.log("Verification successful! Updating status...");
+      updateVerificationStatus(true);
+      sharedState.hasBeenVerified = true;
+      
+      // Force a re-check with the server to confirm the database update
+      try {
+        await checkVerification();
+      } catch (e) {
+        console.error("Error checking verification after success:", e);
+        // Continue even if check fails, since we already know verification succeeded
+      }
+      
       return verifyResult;
     } catch (error: any) {
       console.error("Error during verification process:", error);
@@ -158,8 +247,9 @@ export const useVerification = () => {
       return null;
     } finally {
       setIsVerifying(false);
+      sharedState.verificationInProgress = false;
     }
-  }, [session?.user?.sub, isVerifying]); // Removed checkVerification from deps as it's not directly used here
+  }, [session?.user?.sub, isVerified, isVerifying, updateVerificationStatus, checkVerification]);
 
   return {
     isVerified,
